@@ -1,3 +1,4 @@
+import Features from "@/components/Features";
 import HowItWorksSection from "@/components/HowItWorksSection";
 
 import { Button } from "@/components/ui/button";
@@ -26,6 +27,9 @@ const page = () => {
 
       <section className="mt-30 ml-20">
         <HowItWorksSection />
+      </section>
+      <section>
+        <Features />
       </section>
     </main>
   );

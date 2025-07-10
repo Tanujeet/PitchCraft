@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Car } from "lucide-react";
+
 
 const HowItWorksSection = () => {
     const howItWorksItems = [
