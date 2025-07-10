@@ -1,3 +1,7 @@
+import HowItWorksSection from "@/components/HowItWorksSection";
+
+import { Button } from "@/components/ui/button";
+
 const page = () => {
   return (
     <main>
@@ -13,11 +17,15 @@ const page = () => {
               AI-powered tool. <br className="hidden sm:inline" /> Simply
               describe your startup idea, and let PitchCraft do the rest.
             </p>
-            <button className="px-6 py-2 bg-black text-white font-medium rounded-3xl hover:bg-gray-800 transition mt-10">
+            <Button className="px-6 py-2 bg-black text-white font-medium rounded-3xl hover:bg-gray-800 transition mt-10">
               Get Started
-            </button>
+            </Button>
           </div>
         </div>
+      </section>
+
+      <section className="mt-30 ml-20">
+        <HowItWorksSection />
       </section>
     </main>
   );
