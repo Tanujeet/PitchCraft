@@ -11,3 +11,124 @@ datasource db {
 
 
 
+model User {
+  id                 String   @id // Clerk user.id (e.g., "user_abc123")
+  name               String?
+  email              String   @unique
+  subscriptionStatus SubscriptionStatus @default(FREE)
+  stripeCustomerId   String?
+  createdAt          DateTime @default(now())
+  lastLogin          DateTime?
+  imageUrl           String?
+
+  // Relations
+  projects           Project[]
+  collaborators      Collaborator[]
+  subscriptions      Subscription[]
+  slideVersions      SlideVersion[]
+  invitedCollaborators Collaborator[] @relation("InvitedBy")
+}
+
+model Project {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  ownerId     String
+  shareId     String   @unique
+  isPublic    Boolean  @default(false)
+  theme       String   @default("default")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  owner        User        @relation(fields: [ownerId], references: [id])
+  slides       Slide[]
+  collaborators Collaborator[]
+  publicViews   PublicViewLog[]
+}
+
+model Slide {
+  id        String   @id @default(uuid())
+  projectId String
+  title     String
+  content   Json
+  order     Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  project Project @relation(fields: [projectId], references: [id])
+  versions SlideVersion[]
+}
+
+model Collaborator {
+  id           String   @id @default(uuid())
+  projectId    String
+  userId       String
+  role         CollaboratorRole
+  invitedById  String?
+  createdAt    DateTime @default(now())
+
+  // Relations
+  project     Project @relation(fields: [projectId], references: [id])
+  user        User    @relation(fields: [userId], references: [id])
+  invitedBy   User?   @relation("InvitedBy", fields: [invitedById], references: [id])
+}
+
+model Subscription {
+  id                   String   @id @default(uuid())
+  userId               String
+  stripeCustomerId     String
+  stripeSubscriptionId String
+  plan                 SubscriptionPlan
+  status               SubscriptionStatus
+  currentPeriodEnd     DateTime
+
+  // Relations
+  user User @relation(fields: [userId], references: [id])
+}
+
+model SlideVersion {
+  id          String   @id @default(uuid())
+  slideId     String
+  content     Json
+  createdById String
+  createdAt   DateTime @default(now())
+
+  // Relations
+  slide     Slide @relation(fields: [slideId], references: [id])
+  createdBy User  @relation(fields: [createdById], references: [id])
+}
+
+model PublicViewLog {
+  id        String   @id @default(uuid())
+  projectId String
+  ipAddress String?
+  viewerEmail String?
+  viewedAt  DateTime @default(now())
+
+  // Relations
+  project Project @relation(fields: [projectId], references: [id])
+}
+
+// ENUMS
+
+enum SubscriptionStatus {
+  FREE
+  PRO
+  TRIAL
+  CANCELLED
+  ACTIVE
+  PAST_DUE
+}
+
+enum SubscriptionPlan {
+  FREE
+  PRO
+}
+
+enum CollaboratorRole {
+  OWNER
+  EDITOR
+  VIEWER
+}
