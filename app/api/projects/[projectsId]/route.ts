@@ -1,6 +1,5 @@
-import prisma from "@/lib/primsa";
+import prisma from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
-
 
 import { NextResponse } from "next/server";
 
@@ -13,7 +12,6 @@ export async function GET(
     return new NextResponse("Unauthorised", { status: 402 });
   }
 
-
   const { projectId } = context.params;
 
   const fetchProject = await prisma.project.findUnique({
@@ -24,18 +22,15 @@ export async function GET(
   if (!fetchProject) {
     return new NextResponse("Project not found", { status: 404 });
   }
-   
 
   const isOwner = fetchProject.ownerId === userId;
   const isCollaborator = fetchProject.collaborators.some(
     (c) => c.userId === userId
   );
 
-
   if (!isOwner && !isCollaborator) {
     return new NextResponse("Forbidden", { status: 403 });
   }
 
   return NextResponse.json(fetchProject);
-
 }
