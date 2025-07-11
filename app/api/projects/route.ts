@@ -1,7 +1,6 @@
 import prisma from "@/lib/primsa";
 import { auth } from "@clerk/nextjs/server";
 import { nanoid } from "nanoid";
-
 import { NextResponse } from "next/server";
 
 
