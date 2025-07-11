@@ -1,5 +1,7 @@
 import Features from "@/components/Features";
 import HowItWorksSection from "@/components/HowItWorksSection";
+import Pricing from "@/components/Pricing";
+import Testimonials from "@/components/Testimonials";
 
 import { Button } from "@/components/ui/button";
 
@@ -24,12 +26,18 @@ const page = () => {
           </div>
         </div>
       </section>
-
       <section className="mt-30 ml-20">
         <HowItWorksSection />
       </section>
       <section>
         <Features />
+      </section>
+      <section>
+        <Pricing />
+      </section>
+      s
+      <section>
+        <Testimonials />
       </section>
     </main>
   );
