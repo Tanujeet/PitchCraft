@@ -79,33 +79,43 @@ export async function PATCH(
 
 export async function DELETE(context: { params: { projectId: string } }) {
   const { userId } = await auth();
-  if (!userId) {
-    return new NextResponse("Unauthorised", { status: 401 });
-  }
+  if (!userId) return new NextResponse("Unauthorized", { status: 401 });
+
+  const { projectId } = context.params;
+
+  const project = await prisma.project.findUnique({
+    where: { id: projectId },
+    select: { ownerId: true },
+  });
+
+  if (!project) return new NextResponse("Project not found", { status: 404 });
+  if (project.ownerId !== userId)
+    return new NextResponse("Forbidden", { status: 403 });
 
   try {
-    const { projectId } = context.params;
+    await prisma.$transaction([
+      prisma.slideVersion.deleteMany({
+        where: { slide: { projectId } },
+      }),
+      prisma.slide.deleteMany({
+        where: { projectId },
+      }),
+      prisma.collaborator.deleteMany({
+        where: { projectId },
+      }),
+      prisma.publicViewLog.deleteMany({
+        where: { projectId },
+      }),
+      prisma.project.delete({
+        where: { id: projectId },
+      }),
+    ]);
 
-    const fetchProject = await prisma.project.findUnique({
-      where: { id: projectId },
+    return new NextResponse("Project and related data deleted", {
+      status: 200,
     });
-    if (!fetchProject) {
-      return new NextResponse("Project not found", { status: 404 });
-    }
-
-    const isOwner = fetchProject.ownerId === userId;
-
-    if (!isOwner) {
-      return new NextResponse("Forbidden", { status: 403 });
-    }
-
-    const deletedProject = await prisma.project.delete({
-      where: { id: projectId },
-    });
-
-    return NextResponse.json(deletedProject, { status: 200 });
-  } catch (err) {
-    console.error("error deleting project", err);
-    return new NextResponse("Internal Server Error", { status: 500 });
+  } catch (error) {
+    console.error("Failed to delete project:", error);
+    return new NextResponse("Internal server error", { status: 500 });
   }
 }
