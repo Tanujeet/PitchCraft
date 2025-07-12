@@ -3,9 +3,9 @@
 import { SignInButton, UserButton } from "@clerk/nextjs";
 import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
+import { Button } from "./ui/button";
 
 const Navbar = () => {
-
   const { user, isLoaded } = useUser();
   return (
     <nav className="h-20 border-b border-black px-6 md:px-10 flex items-center justify-between">
@@ -20,7 +20,7 @@ const Navbar = () => {
               <Link href="/dashboard">Dashboard</Link>
             </li>
             <li>
-              <Link href="/create">New Project</Link>
+              <Button>New Pitch</Button>
             </li>
           </>
         )}

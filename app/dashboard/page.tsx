@@ -7,7 +7,7 @@ const page = () => {
   const username = user?.firstName || "Developer";
 
   const data = [
-    { title: "Total project", des: "25" },
+    { title: "Total Pitch", des: "25" },
     { title: "Total Slides", des: "156" },
     { title: "Total Views", des: "3245" },
     { title: "Total Slides", des: "Project phoneix" },
