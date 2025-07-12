@@ -21,7 +21,7 @@ const page = () => {
             Welcome back, {username}
           </h1>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 p-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mt-10">
           {data.map((item, idx) => (
             <Card key={idx} className="shadow-md rounded-2xl">
               <CardHeader>
@@ -37,7 +37,7 @@ const page = () => {
         </div>
       </section>
       <section>
-        <div className="mt-40">
+        <div className="mt-35">
           <h1 className="text-3xl font-bold">Recent Activity</h1>
         </div>
       </section>
