@@ -1,7 +1,18 @@
-import { Button } from "@/components/ui/button";
+"use client";
 
+import Slides from "@/components/Slides";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { useState } from "react";
 const Page = () => {
+  const [idea, setIdea] = useState("");
   return (
     <main>
       <section>
@@ -15,10 +26,26 @@ const Page = () => {
             </p>
 
             <Textarea
+              value={idea}
+              onChange={(e) => setIdea(e.target.value)}
               placeholder="An app that connects local artists with businesses for mural projects..."
               className="mt-10 h-40 text-base resize-none"
             />
-            <Button className="mt-10">Generate Slides</Button>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button className="mt-10">Generate Slides</Button>
+              </DialogTrigger>
+
+              <DialogContent className="max-w-3xl">
+                <DialogHeader>
+                  <DialogTitle className="text-center">
+                    Your AI-Generated Slides
+                  </DialogTitle>
+                </DialogHeader>
+
+                <Slides idea={idea} />
+              </DialogContent>
+            </Dialog>
 
             <p className="font-light mt-4 text-gray-500">
               💡 Tip: Write your idea like you're talking to an investor or
