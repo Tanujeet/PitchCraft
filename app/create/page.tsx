@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 
 import { Textarea } from "@/components/ui/textarea";
-const page = () => {
+const Page = () => {
   return (
     <main>
       <section>
@@ -31,4 +31,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Page;
