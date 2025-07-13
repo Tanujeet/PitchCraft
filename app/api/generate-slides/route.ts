@@ -1,42 +1,41 @@
-import { NextRequest } from "next/server";
-import { OpenAIStream, streamText } from "ai";
-import openai from "@/lib/openai";
+// app/api/generate-slides/route.ts
 
-export const runtime = "edge"; // Use if you're deploying on Vercel or using edge functions
+import { NextRequest, NextResponse } from "next/server";
+import openai from "@/lib/openai"; // Your OpenAI config file
 
 export async function POST(req: NextRequest) {
-  const { idea } = await req.json();
+  try {
+    const { idea } = await req.json();
 
-  const prompt = `
-You are a startup pitch deck generator.
-Generate 10 slide ideas for the following startup in JSON format as an array of 10 items.
-Each item must have "title" and "content".
+    if (!idea) {
+      return NextResponse.json({ error: "No idea provided" }, { status: 400 });
+    }
 
-Startup idea: "${idea}"
+    const response = await openai.chat.completions.create({
+      model: "gpt-4",
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are a startup pitch deck generator. Return a JSON array of 10 slides. Each slide should have a title and content. Respond only with JSON.",
+        },
+        {
+          role: "user",
+          content: `Generate a 10-slide pitch deck for the following startup idea:\n\n"${idea}"`,
+        },
+      ],
+      temperature: 0.7,
+    });
 
-Respond ONLY as a JSON array like:
-[
-  { "title": "Slide 1", "content": "..." },
-  ...
-]
-`;
+    // Try parsing the JSON (GPT should return JSON array of slides)
+    const slides = JSON.parse(response.choices[0].message.content || "[]");
 
-  const response = await openai.chat.completions.create({
-    model: "gpt-4",
-    stream: true,
-    messages: [
-      {
-        role: "system",
-        content:
-          "You generate structured JSON pitch slides with a title and content for each.",
-      },
-      {
-        role: "user",
-        content: prompt,
-      },
-    ],
-  });
-
-  const stream = OpenAIStream(response);
-  return  streamText(stream);
+    return NextResponse.json({ slides });
+  } catch (error) {
+    console.error("Error generating slides:", error);
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
+  }
 }
