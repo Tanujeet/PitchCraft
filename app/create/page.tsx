@@ -17,20 +17,20 @@ import { axiosInstance } from "@/lib/axios";
 const Page = () => {
   const [idea, setIdea] = useState("");
   const [slides, setSlides] = useState([]);
-  const params = useParams();
-  const projectsId = params.projectsId as string;
+const params = useParams();
+const projectsId = params.projectsId as string; // ✅ fix here
 
-  const generateSlides = async () => {
-    try {
-      const res = await axiosInstance.post(`/projects/${projectsId}/slides`, {
-        idea,
-      });
-      console.log(params);
-      setSlides(res.data.slides);
-    } catch (error) {
-      console.error("Failed to generate slides:", error);
-    }
-  };
+const generateSlides = async () => {
+  try {
+    const res = await axiosInstance.post(`/projects/${projectsId}/slides`, {
+      idea,
+    });
+
+    setSlides(res.data.slides);
+  } catch (error) {
+    console.error("Failed to generate slides:", error);
+  }
+};
 
   return (
     <main>

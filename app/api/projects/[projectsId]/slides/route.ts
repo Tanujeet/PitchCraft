@@ -53,7 +53,7 @@ export async function POST(
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    const { projectsId: projectId } = context.params;
+   const projectId = context.params.projectsId;
     const { idea, description } = await req.json();
 
     if (!idea) {

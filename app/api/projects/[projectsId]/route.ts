@@ -43,7 +43,7 @@ export async function PATCH(
   if (!userId) return new NextResponse("Unauthorized", { status: 401 });
 
   try {
-    const { projectsId: projectId } = context.params;
+    const projectId = context.params.projectsId;
     const { title, description, theme } = await req.json();
 
     const project = await prisma.project.findUnique({
