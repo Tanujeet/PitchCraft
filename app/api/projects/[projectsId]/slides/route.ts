@@ -6,9 +6,10 @@ import { NextRequest, NextResponse } from "next/server";
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
 
-export async function GET(context: {
-  params: { projectsId: string };
-}): Promise<NextResponse> {
+export async function GET(
+  req: NextRequest,
+  context: { params: { projectsId: string } }
+): Promise<NextResponse> {
   const { userId } = await auth();
   if (!userId) {
     return new NextResponse("Unauthorized", { status: 401 });
