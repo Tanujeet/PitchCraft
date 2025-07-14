@@ -8,14 +8,14 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
 
 export async function POST(
   req: NextRequest,
-  context: { params: Record<string, string> }
+  { params }: { params: { projectsId: string } }
 ): Promise<NextResponse> {
   const { userId } = await auth();
   if (!userId) {
     return new NextResponse("Unauthorized", { status: 401 });
   }
 
-  const projectId = context.params.projectsId;
+  const projectId = params.projectsId;
 
   try {
     const project = await prisma.project.findUnique({

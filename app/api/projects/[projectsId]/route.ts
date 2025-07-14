@@ -5,12 +5,12 @@ import { NextRequest, NextResponse } from "next/server";
 // ✅ GET Project with slides & collaborators
 export async function GET(
   req: NextRequest,
-  context: { params: { projectsId: string } }
+  { params }: { params: { projectsId: string } }
 ): Promise<NextResponse> {
   const { userId } = await auth();
   if (!userId) return new NextResponse("Unauthorized", { status: 401 });
 
-  const { projectsId: projectId } = context.params;
+  const projectId = params.projectsId;
 
   const project = await prisma.project.findUnique({
     where: { id: projectId },
@@ -37,13 +37,13 @@ export async function GET(
 // ✅ PATCH Project details (only owner)
 export async function PATCH(
   req: NextRequest,
-  context: { params: { projectsId: string } }
+  { params }: { params: { projectsId: string } }
 ): Promise<NextResponse> {
   const { userId } = await auth();
   if (!userId) return new NextResponse("Unauthorized", { status: 401 });
 
   try {
-    const projectId = context.params.projectsId;
+    const projectId = params.projectsId;
     const { title, description, theme } = await req.json();
 
     const project = await prisma.project.findUnique({
@@ -76,12 +76,12 @@ export async function PATCH(
 // ✅ DELETE Project and all related data (only owner)
 export async function DELETE(
   req: NextRequest,
-  context: { params: { projectsId: string } }
+  { params }: { params: { projectsId: string } }
 ): Promise<NextResponse> {
   const { userId } = await auth();
   if (!userId) return new NextResponse("Unauthorized", { status: 401 });
 
-  const { projectsId: projectId } = context.params;
+  const projectId = params.projectsId;
 
   const project = await prisma.project.findUnique({
     where: { id: projectId },
