@@ -31,21 +31,38 @@ export async function POST(context: { params: { projectId: string } }) {
     ) {
       return new NextResponse("Forbidden", { status: 403 });
     }
+  const user = await prisma.user.findUnique({ where: { id: userId } });
 
-    // 2. Backup current slides to SlideVersion
-    const existingSlides = await prisma.slide.findMany({
-      where: { projectId },
+  if (!user) {
+    return new NextResponse("User not found", { status: 404 });
+  }
+
+  const allowed = ["PRO", "TRIAL"];
+  if (!allowed.includes(user.subscriptionStatus)) {
+    return NextResponse.json(
+      {
+        error: "Upgrade required to use slide regeneration",
+        upgradeUrl: "/pricing",
+      },
+      { status: 403 }
+    );
+  }
+  // 2. Backup current slides to SlideVersion
+  const existingSlides = await prisma.slide.findMany({
+    where: { projectId },
+  });
+
+  for (const slide of existingSlides) {
+    await prisma.slideVersion.create({
+      data: {
+        slideId: slide.id,
+        content: JSON.parse(JSON.stringify(slide.content)), // Fix for InputJsonValue
+        createdById: userId,
+      },
     });
+  }
+      
 
-    for (const slide of existingSlides) {
-      await prisma.slideVersion.create({
-        data: {
-          slideId: slide.id,
-          content: JSON.parse(JSON.stringify(slide.content)), // Fix for InputJsonValue
-          createdById: userId,
-        },
-      });
-    }
 
     // 3. Generate new slides from OpenAI
     const prompt = `Regenerate a 10-slide startup pitch deck for the following idea:\n"${project.description}". Return an array of objects with 'title' and 'content'.`;
