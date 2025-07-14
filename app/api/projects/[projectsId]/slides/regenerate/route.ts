@@ -1,27 +1,26 @@
 import { auth } from "@clerk/nextjs/server";
-import { NextResponse } from "next/server";
-
-
-
+import { NextResponse, NextRequest } from "next/server";
 import prisma from "@/lib/prisma";
-import openai from "@/lib/openai";
 
+import { OpenAI } from "openai";
 
-export async function POST(context: { params: { projectId: string } }) {
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
+
+export async function POST(
+  req: NextRequest,
+  context: { params: Record<string, string> }
+): Promise<NextResponse> {
   const { userId } = await auth();
   if (!userId) {
     return new NextResponse("Unauthorized", { status: 401 });
   }
 
-  const { projectId } = context.params;
+  const projectId = context.params.projectsId;
 
   try {
-    // 1. Get project with collaborators
     const project = await prisma.project.findUnique({
       where: { id: projectId },
-      include: {
-        collaborators: true,
-      },
+      include: { collaborators: true },
     });
 
     if (
@@ -31,40 +30,38 @@ export async function POST(context: { params: { projectId: string } }) {
     ) {
       return new NextResponse("Forbidden", { status: 403 });
     }
-  const user = await prisma.user.findUnique({ where: { id: userId } });
 
-  if (!user) {
-    return new NextResponse("User not found", { status: 404 });
-  }
+    const user = await prisma.user.findUnique({ where: { id: userId } });
 
-  const allowed = ["PRO", "TRIAL"];
-  if (!allowed.includes(user.subscriptionStatus)) {
-    return NextResponse.json(
-      {
-        error: "Upgrade required to use slide regeneration",
-        upgradeUrl: "/pricing",
-      },
-      { status: 403 }
-    );
-  }
-  // 2. Backup current slides to SlideVersion
-  const existingSlides = await prisma.slide.findMany({
-    where: { projectId },
-  });
+    if (!user) {
+      return new NextResponse("User not found", { status: 404 });
+    }
 
-  for (const slide of existingSlides) {
-    await prisma.slideVersion.create({
-      data: {
-        slideId: slide.id,
-        content: JSON.parse(JSON.stringify(slide.content)), // Fix for InputJsonValue
-        createdById: userId,
-      },
+    const allowed = ["PRO", "TRIAL"];
+    if (!allowed.includes(user.subscriptionStatus)) {
+      return NextResponse.json(
+        {
+          error: "Upgrade required to use slide regeneration",
+          upgradeUrl: "/pricing",
+        },
+        { status: 403 }
+      );
+    }
+
+    const existingSlides = await prisma.slide.findMany({
+      where: { projectId },
     });
-  }
-      
 
+    for (const slide of existingSlides) {
+      await prisma.slideVersion.create({
+        data: {
+          slideId: slide.id,
+          content: JSON.parse(JSON.stringify(slide.content)),
+          createdById: userId,
+        },
+      });
+    }
 
-    // 3. Generate new slides from OpenAI
     const prompt = `Regenerate a 10-slide startup pitch deck for the following idea:\n"${project.description}". Return an array of objects with 'title' and 'content'.`;
 
     const aiRes = await openai.chat.completions.create({
@@ -85,10 +82,8 @@ export async function POST(context: { params: { projectId: string } }) {
       return new NextResponse("Invalid slide data", { status: 400 });
     }
 
-    // 4. Delete old slides
     await prisma.slide.deleteMany({ where: { projectId } });
 
-    // 5. Save new slides
     const createdSlides = await Promise.all(
       newSlides.map((slide, index) =>
         prisma.slide.create({

@@ -2,113 +2,109 @@ import prisma from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 
+// ✅ GET Project with slides & collaborators
 export async function GET(
-  req: NextResponse,
-  context: { params: { projectId: string } }
-) {
+  req: NextRequest,
+  context: { params: { projectsId: string } }
+): Promise<NextResponse> {
   const { userId } = await auth();
-  if (!userId) {
-    return new NextResponse("Unauthorised", { status: 401 });
-  }
+  if (!userId) return new NextResponse("Unauthorized", { status: 401 });
 
-  const { projectId } = context.params;
+  const { projectsId: projectId } = context.params;
 
-  const fetchProject = await prisma.project.findUnique({
+  const project = await prisma.project.findUnique({
     where: { id: projectId },
-    include: { slides: true, collaborators: { include: { user: true } } },
+    include: {
+      slides: true,
+      collaborators: { include: { user: true } },
+    },
   });
 
-  if (!fetchProject) {
+  if (!project) {
     return new NextResponse("Project not found", { status: 404 });
   }
 
-  const isOwner = fetchProject.ownerId === userId;
-  const isCollaborator = fetchProject.collaborators.some(
-    (c) => c.userId === userId
-  );
+  const isOwner = project.ownerId === userId;
+  const isCollaborator = project.collaborators.some((c) => c.userId === userId);
 
   if (!isOwner && !isCollaborator) {
     return new NextResponse("Forbidden", { status: 403 });
   }
 
-  return NextResponse.json(fetchProject);
+  return NextResponse.json(project);
 }
 
+// ✅ PATCH Project details (only owner)
 export async function PATCH(
   req: NextRequest,
-  context: { params: { projectId: string } }
-) {
+  context: { params: { projectsId: string } }
+): Promise<NextResponse> {
   const { userId } = await auth();
-  if (!userId) {
-    return new NextResponse("Unauthorised", { status: 401 });
-  }
+  if (!userId) return new NextResponse("Unauthorized", { status: 401 });
 
   try {
-    const { projectId } = context.params;
-    const body = await req.json();
-    const { title, description, theme } = body;
+    const { projectsId: projectId } = context.params;
+    const { title, description, theme } = await req.json();
 
-    const fetchProject = await prisma.project.findUnique({
+    const project = await prisma.project.findUnique({
       where: { id: projectId },
-      include: { slides: true, collaborators: { include: { user: true } } },
+      include: {
+        collaborators: { include: { user: true } },
+      },
     });
-    if (!fetchProject) {
+
+    if (!project) {
       return new NextResponse("Project not found", { status: 404 });
     }
 
-    const isOwner = fetchProject.ownerId === userId;
-    const isCollaborator = fetchProject.collaborators.some(
-      (c) => c.userId === userId
-    );
-
-    if (!isOwner) {
+    if (project.ownerId !== userId) {
       return new NextResponse("Forbidden", { status: 403 });
     }
 
-    const updateProject = await prisma.project.update({
+    const updated = await prisma.project.update({
       where: { id: projectId },
       data: { title, description, theme },
     });
 
-    return NextResponse.json({ updateProject }, { status: 200 });
+    return NextResponse.json(updated, { status: 200 });
   } catch (err) {
-    console.error("error updating", err);
+    console.error("Error updating project:", err);
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 }
 
-export async function DELETE(context: { params: { projectId: string } }) {
+// ✅ DELETE Project and all related data (only owner)
+export async function DELETE(
+  req: NextRequest,
+  context: { params: { projectsId: string } }
+): Promise<NextResponse> {
   const { userId } = await auth();
   if (!userId) return new NextResponse("Unauthorized", { status: 401 });
 
-  const { projectId } = context.params;
+  const { projectsId: projectId } = context.params;
 
   const project = await prisma.project.findUnique({
     where: { id: projectId },
     select: { ownerId: true },
   });
 
-  if (!project) return new NextResponse("Project not found", { status: 404 });
-  if (project.ownerId !== userId)
+  if (!project) {
+    return new NextResponse("Project not found", { status: 404 });
+  }
+
+  if (project.ownerId !== userId) {
     return new NextResponse("Forbidden", { status: 403 });
+  }
 
   try {
     await prisma.$transaction([
       prisma.slideVersion.deleteMany({
         where: { slide: { projectId } },
       }),
-      prisma.slide.deleteMany({
-        where: { projectId },
-      }),
-      prisma.collaborator.deleteMany({
-        where: { projectId },
-      }),
-      prisma.publicViewLog.deleteMany({
-        where: { projectId },
-      }),
-      prisma.project.delete({
-        where: { id: projectId },
-      }),
+      prisma.slide.deleteMany({ where: { projectId } }),
+      prisma.collaborator.deleteMany({ where: { projectId } }),
+      prisma.publicViewLog.deleteMany({ where: { projectId } }),
+      prisma.project.delete({ where: { id: projectId } }),
     ]);
 
     return new NextResponse("Project and related data deleted", {
@@ -116,6 +112,6 @@ export async function DELETE(context: { params: { projectId: string } }) {
     });
   } catch (error) {
     console.error("Failed to delete project:", error);
-    return new NextResponse("Internal server error", { status: 500 });
+    return new NextResponse("Internal Server Error", { status: 500 });
   }
 }

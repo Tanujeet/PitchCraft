@@ -1,24 +1,25 @@
 import prisma from "@/lib/prisma";
-
-
 import { auth } from "@clerk/nextjs/server";
 import { OpenAI } from "openai";
+import { Prisma } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(context: { params: { projectId: string } }) {
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
+
+export async function GET(context: {
+  params: { projectsId: string };
+}): Promise<NextResponse> {
   const { userId } = await auth();
   if (!userId) {
-    return new NextResponse("Unauthorised", { status: 401 });
+    return new NextResponse("Unauthorized", { status: 401 });
   }
 
   try {
-    const { projectId } = context.params;
+    const { projectsId: projectId } = context.params;
 
     const project = await prisma.project.findUnique({
       where: { id: projectId },
-      include: {
-        collaborators: true,
-      },
+      include: { collaborators: true },
     });
 
     if (
@@ -33,18 +34,18 @@ export async function GET(context: { params: { projectId: string } }) {
       where: { projectId },
       orderBy: { order: "asc" },
     });
+
     return NextResponse.json({ slides });
   } catch (e) {
     console.error("Error fetching slides:", e);
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 }
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
 
 export async function POST(
   req: NextRequest,
-  context: { params: { projectId: string } }
-) {
+  context: { params: { projectsId: string } }
+): Promise<NextResponse> {
   try {
     const { userId } = await auth();
 
@@ -52,7 +53,7 @@ export async function POST(
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    const { projectId } = context.params;
+    const { projectsId: projectId } = context.params;
     const { idea, description } = await req.json();
 
     if (!idea) {
@@ -111,19 +112,29 @@ export async function POST(
     try {
       slides = JSON.parse(slidesJson);
     } catch (err) {
-      console.error("Failed to parse OpenAI response:", slidesJson);
+      console.error("❌ Failed to parse OpenAI response:", slidesJson);
       return NextResponse.json(
         { error: "Failed to parse slide data" },
         { status: 500 }
       );
     }
 
-    // Save previous slide versions
+    // Save existing slides as versions
     const existingSlides = await prisma.slide.findMany({
       where: { projectId },
     });
 
     for (const slide of existingSlides) {
+      await prisma.slideVersion.create({
+        data: {
+          slideId: slide.id,
+          content:
+            slide.content === null || slide.content === undefined
+              ? Prisma.JsonNull
+              : slide.content,
+          createdById: userId,
+        },
+      });
     }
 
     // Remove old slides
@@ -136,7 +147,10 @@ export async function POST(
           data: {
             projectId,
             title: slide.title,
-            content: slide.content,
+            content:
+              slide.content === null || slide.content === undefined
+                ? Prisma.JsonNull
+                : slide.content,
             order: index,
           },
         })
