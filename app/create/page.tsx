@@ -19,16 +19,29 @@ const Page = () => {
   const [slides, setSlides] = useState([]);
 const params = useParams();
 const projectsId = params.projectsId as string; // ✅ fix here
-
 const generateSlides = async () => {
   try {
-    const res = await axiosInstance.post(`/projects/${projectsId}/slides`, {
-      idea,
-    });
+    let currentProjectId = projectsId;
+
+    // If no projectId, auto-create one
+    if (!currentProjectId) {
+      const projectRes = await axiosInstance.post("/projects", {
+        title: "Untitled Project",
+        description: idea,
+      });
+      currentProjectId = projectRes.data.id;
+    }
+
+    const res = await axiosInstance.post(
+      `/projects/${currentProjectId}/slides`,
+      {
+        idea,
+      }
+    );
 
     setSlides(res.data.slides);
   } catch (error) {
-    console.error("Failed to generate slides:", error);
+    console.error("Slide generation failed:", error);
   }
 };
 
