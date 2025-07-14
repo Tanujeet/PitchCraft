@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Slides from "@/components/Slides";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,33 +17,24 @@ import { axiosInstance } from "@/lib/axios";
 const Page = () => {
   const [idea, setIdea] = useState("");
   const [slides, setSlides] = useState([]);
-const params = useParams();
-const projectsId = params.projectsId as string; // ✅ fix here
-const generateSlides = async () => {
-  try {
-    let currentProjectId = projectsId;
-
-    // If no projectId, auto-create one
-    if (!currentProjectId) {
-      const projectRes = await axiosInstance.post("/projects", {
+  const router = useRouter();
+  const generateSlides = async () => {
+    try {
+      const res = await axiosInstance.post("/slides/project", {
         title: "Untitled Project",
         description: idea,
+        theme: "default",
       });
-      currentProjectId = projectRes.data.id;
+
+      const { projectId, slides } = res.data;
+
+      router.push(`/projects/${projectId}`);
+
+      setSlides(slides);
+    } catch (error) {
+      console.error("Slide generation failed:", error);
     }
-
-    const res = await axiosInstance.post(
-      `/projects/${currentProjectId}/slides`,
-      {
-        idea,
-      }
-    );
-
-    setSlides(res.data.slides);
-  } catch (error) {
-    console.error("Slide generation failed:", error);
-  }
-};
+  };
 
   return (
     <main>
