@@ -1,14 +1,23 @@
+"use client";
+
+import { axiosInstance } from "@/lib/axios";
+import { useEffect } from "react";
+
 type SlidesProps = {
-  idea: string;
+  slides: { title: string; content: any }[];
 };
 
-const Slides = ({ idea }: SlidesProps) => {
+const Slides = ({ slides }: SlidesProps) => {
   return (
     <div className="space-y-4 text-center">
-      <div className="p-4 bg-gray-100 rounded-lg">
-        <h2 className="font-bold text-xl text-center">Slide 1: Your Idea</h2>
-        <p>{idea || "No idea provided"}</p>
-      </div>
+      {slides.map((slide, idx) => (
+        <div key={idx} className="p-4 bg-gray-100 rounded-lg">
+          <h2 className="font-bold text-xl">
+            Slide {idx + 1}: {slide.title}
+          </h2>
+          <p>{slide.content}</p>
+        </div>
+      ))}
     </div>
   );
 };

@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+import { useParams } from "next/navigation";
 import Slides from "@/components/Slides";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,9 +12,26 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { useState } from "react";
+import { axiosInstance } from "@/lib/axios";
+
 const Page = () => {
   const [idea, setIdea] = useState("");
+  const [slides, setSlides] = useState([]);
+  const params = useParams();
+  const projectsId = params.projectId as string;
+
+  const generateSlides = async () => {
+    try {
+      const res = await axiosInstance.post(`/projects/${projectsId}/slides`, {
+        idea,
+      });
+
+      setSlides(res.data.slides);
+    } catch (error) {
+      console.error("Failed to generate slides:", error);
+    }
+  };
+
   return (
     <main>
       <section>
@@ -31,9 +50,12 @@ const Page = () => {
               placeholder="An app that connects local artists with businesses for mural projects..."
               className="mt-10 h-40 text-base resize-none"
             />
+
             <Dialog>
               <DialogTrigger asChild>
-                <Button className="mt-10">Generate Slides</Button>
+                <Button className="mt-10" onClick={generateSlides}>
+                  Generate Slides
+                </Button>
               </DialogTrigger>
 
               <DialogContent className="max-w-3xl">
@@ -43,7 +65,7 @@ const Page = () => {
                   </DialogTitle>
                 </DialogHeader>
 
-                <Slides idea={idea} />
+                <Slides slides={slides} />
               </DialogContent>
             </Dialog>
 
