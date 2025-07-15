@@ -27,8 +27,8 @@ Title: ...
 ...
 
 (Continue up to Slide 10). Keep bullets insightful and professional.`,
-      temperature: 0.6, // Less randomness, better structure
-      max_tokens: 1000, // More room for content
+      temperature: 0.6,
+      max_tokens: 1000,
     },
     {
       headers: {
@@ -40,7 +40,7 @@ Title: ...
 
   const raw = response.data.generations?.[0]?.text || "";
 
-  // Parse raw text into slide objects
+  
   const slideChunks = raw.split(/Slide \d+:/i).filter(Boolean);
 
   const slides = slideChunks.map((chunk: string) => {
