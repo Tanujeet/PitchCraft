@@ -18,70 +18,71 @@ const Page = () => {
   const [idea, setIdea] = useState("");
   const [slides, setSlides] = useState([]);
   const router = useRouter();
-  const generateSlides = async () => {
-    try {
-      const res = await axiosInstance.post("/slides/project", {
-        title: "Untitled Project",
-        description: idea,
-        theme: "default",
-      });
+const [projectId, setProjectId] = useState("");
 
-      const { projectId, slides } = res.data;
+const generateSlides = async () => {
+  try {
+    const res = await axiosInstance.post("/slides/generate", { idea });
+    const { projectId, slides } = res.data;
 
-      router.push(`/projects/${projectId}`);
+    setSlides(slides);
+    setProjectId(projectId); // store for use in "Continue" button
+  } catch (error) {
+    console.error("Slide generation failed:", error);
+  }
+};
+return (
+  <main>
+    <section>
+      <div className="flex justify-center items-center mt-20">
+        <div className="text-center max-w-2xl">
+          <h1 className="text-4xl sm:text-5xl font-bold leading-tight">
+            Describe your idea. Let AI craft your pitch.
+          </h1>
+          <p className="text-lg sm:text-xl mt-4 font-medium text-gray-600">
+            Powered by AI, built for visionaries.
+          </p>
 
-      setSlides(slides);
-    } catch (error) {
-      console.error("Slide generation failed:", error);
-    }
-  };
+          <Textarea
+            value={idea}
+            onChange={(e) => setIdea(e.target.value)}
+            placeholder="An app that connects local artists with businesses for mural projects..."
+            className="mt-10 h-40 text-base resize-none"
+          />
 
-  return (
-    <main>
-      <section>
-        <div className="flex justify-center items-center mt-20">
-          <div className="text-center max-w-2xl">
-            <h1 className="text-4xl sm:text-5xl font-bold leading-tight">
-              Describe your idea. Let AI craft your pitch.
-            </h1>
-            <p className="text-lg sm:text-xl mt-4 font-medium text-gray-600">
-              Powered by AI, built for visionaries.
-            </p>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button className="mt-10" onClick={generateSlides}>
+                Generate Slides
+              </Button>
+            </DialogTrigger>
 
-            <Textarea
-              value={idea}
-              onChange={(e) => setIdea(e.target.value)}
-              placeholder="An app that connects local artists with businesses for mural projects..."
-              className="mt-10 h-40 text-base resize-none"
-            />
+            <DialogContent className="max-w-3xl">
+              <DialogHeader>
+                <DialogTitle className="text-center">
+                  Your AI-Generated Slides
+                </DialogTitle>
+              </DialogHeader>
 
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button className="mt-10" onClick={generateSlides}>
-                  Generate Slides
-                </Button>
-              </DialogTrigger>
+              <Slides slides={slides} />
 
-              <DialogContent className="max-w-3xl">
-                <DialogHeader>
-                  <DialogTitle className="text-center">
-                    Your AI-Generated Slides
-                  </DialogTitle>
-                </DialogHeader>
+              <Button
+                onClick={() => router.push(`/projects/${projectId}`)}
+                className="mt-6 w-full"
+              >
+                Continue to Editor
+              </Button>
+            </DialogContent>
+          </Dialog>
 
-                <Slides slides={slides} />
-              </DialogContent>
-            </Dialog>
-
-            <p className="font-light mt-4 text-gray-500">
-              💡 Tip: Write your idea like you're talking to an investor or
-              user.
-            </p>
-          </div>
+          <p className="font-light mt-4 text-gray-500">
+            💡 Tip: Write your idea like you're talking to an investor or user.
+          </p>
         </div>
-      </section>
-    </main>
-  );
+      </div>
+    </section>
+  </main>
+);
 };
 
 export default Page;
