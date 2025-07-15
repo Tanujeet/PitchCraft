@@ -68,7 +68,7 @@ export async function DELETE(
 
   try {
     const fetch = await prisma.slide.findUnique({
-      where: { id: userId },
+      where: { id: slideId },
       select: { projectId: true },
     });
 
@@ -92,6 +92,7 @@ export async function DELETE(
     const deletedSlide = await prisma.slide.delete({ where: { id: slideId } });
     return NextResponse.json({ success: true, deleted: deletedSlide });
   } catch (error) {
-    console.error("Failed to delete", error);
+      console.error("Failed to delete", error);
+        return new NextResponse("Internal Server Error", { status: 500 });
   }
 }
