@@ -1,43 +1,52 @@
-type Slide = {
-  id: string;
+"use client";
+import { useState } from "react";
+
+interface Slide {
   title: string;
-  content: any;
-};
+  content: string;
+}
 
-type SlidesProps = {
-  slides: Slide[];
-  onEdit?: (slide: Slide) => void;
-  onDelete?: (id: string) => void;
-};
+const Slides = ({ slides }: { slides: Slide[] }) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
 
-const Slides = ({ slides, onEdit, onDelete }: SlidesProps) => {
+  const currentSlide = slides[currentIndex];
+
   return (
-    <div className="space-y-4 text-center">
-      {slides.map((slide, idx) => (
-        <div key={slide.id} className="p-4 bg-gray-100 rounded-lg">
-          <h2 className="font-bold text-xl">
-            Slide {idx + 1}: {slide.title}
-          </h2>
-          <p>{slide.content}</p>
-
-          {onEdit && onDelete && (
-            <div className="flex justify-center gap-2 mt-4">
-              <button
-                className="bg-blue-500 text-white px-3 py-1 rounded"
-                onClick={() => onEdit(slide)}
-              >
-                Edit
-              </button>
-              <button
-                className="bg-red-500 text-white px-3 py-1 rounded"
-                onClick={() => onDelete(slide.id)}
-              >
-                Delete
-              </button>
-            </div>
-          )}
+    <div className="w-full text-center">
+      {/* Slide Content */}
+      <div className="min-h-[300px] flex flex-col items-center justify-center">
+        <h2 className="text-2xl font-semibold mb-4">{currentSlide?.title}</h2>
+        <div className="text-left space-y-2">
+          {currentSlide?.content?.split("\n").map((point, i) => (
+            <p key={i}>• {point}</p>
+          ))}
         </div>
-      ))}
+      </div>
+
+      {/* Slide Controls */}
+      <div className="flex items-center justify-between mt-6">
+        <button
+          onClick={() => setCurrentIndex((prev) => Math.max(prev - 1, 0))}
+          disabled={currentIndex === 0}
+          className="px-4 py-2 rounded bg-gray-200 disabled:opacity-50"
+        >
+          Previous
+        </button>
+
+        <p className="text-sm text-gray-500">
+          Slide {currentIndex + 1} of {slides.length}
+        </p>
+
+        <button
+          onClick={() =>
+            setCurrentIndex((prev) => Math.min(prev + 1, slides.length - 1))
+          }
+          disabled={currentIndex === slides.length - 1}
+          className="px-4 py-2 rounded bg-blue-600 text-white disabled:opacity-50"
+        >
+          Next
+        </button>
+      </div>
     </div>
   );
 };

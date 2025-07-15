@@ -6,26 +6,29 @@ type Slide = {
 };
 
 export async function generateSlidesFromIdea(idea: string): Promise<Slide[]> {
-  // ...same code
-
   const response = await axios.post(
     "https://api.cohere.ai/v1/generate",
     {
       model: "command-r-plus",
-      prompt: `Generate a 5-slide startup pitch deck for the idea: "${idea}". Each slide should include a title and 2-3 bullet points. Format:
+      prompt: `You're an expert pitch deck creator.
+Generate a **10-slide** startup pitch deck for the idea: "${idea}".
+Each slide should contain a **Slide Title** and **3 to 4 detailed bullet points**.
+Use this format:
+
 Slide 1:
 Title: ...
 - Bullet 1
 - Bullet 2
+- Bullet 3
 
 Slide 2:
 Title: ...
 - Bullet 1
 ...
 
-(Repeat up to Slide 5)`,
-      temperature: 0.7,
-      max_tokens: 500,
+(Continue up to Slide 10). Keep bullets insightful and professional.`,
+      temperature: 0.6, // Less randomness, better structure
+      max_tokens: 1000, // More room for content
     },
     {
       headers: {
