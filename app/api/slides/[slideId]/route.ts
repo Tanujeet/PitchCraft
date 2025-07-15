@@ -1,0 +1,40 @@
+import prisma from "@/lib/prisma";
+import { auth } from "@clerk/nextjs/server";
+import { NextRequest, NextResponse } from "next/server";
+
+export async function PATCH(req: NextRequest,{params}:{params:{slideId :string}}) {
+    const { userId } = await auth()
+    if (!userId) { return new NextResponse("Unauthorised", { status: 401 }) }
+    
+    const slideId = params.slideId
+    const body = await req.json()
+    const { title, content } = body
+    
+    try {
+        const fetchSlide =await prisma.slide.findUnique({where:{id:slideId},select:{projectId:true}})
+        
+        if (!fetchSlide) {
+            return new NextResponse("Slide doest exist",{status:404})
+        }
+       const projectId = fetchSlide.projectId; 
+        const collaborator = await prisma.collaborator.findFirst({ where: { userId, projectId } })
+          if (!collaborator) {
+            return new NextResponse("Forbidden", { status: 403 })
+        
+        }
+
+
+if (collaborator.role !== "OWNER" && collaborator.role !== "EDITOR") {
+  return new NextResponse("Forbidden", { status: 403 });
+}
+
+
+
+
+
+    } catch (err)
+    {console.error("Failed to fetch",err)
+        
+    }
+
+}
