@@ -9,32 +9,42 @@ export async function PATCH(req: NextRequest,{params}:{params:{slideId :string}}
     const slideId = params.slideId
     const body = await req.json()
     const { title, content } = body
-    
-    try {
-        const fetchSlide =await prisma.slide.findUnique({where:{id:slideId},select:{projectId:true}})
-        
-        if (!fetchSlide) {
-            return new NextResponse("Slide doest exist",{status:404})
-        }
-       const projectId = fetchSlide.projectId; 
-        const collaborator = await prisma.collaborator.findFirst({ where: { userId, projectId } })
-          if (!collaborator) {
-            return new NextResponse("Forbidden", { status: 403 })
-        
-        }
-
-
-if (collaborator.role !== "OWNER" && collaborator.role !== "EDITOR") {
-  return new NextResponse("Forbidden", { status: 403 });
-}
-
-
-
-
-
-    } catch (err)
-    {console.error("Failed to fetch",err)
-        
+    if (!title?.trim() || !content?.trim()) {
+      return new NextResponse("Invalid input", { status: 400 });
     }
 
+    try {
+      const fetchSlide = await prisma.slide.findUnique({
+        where: { id: slideId },
+        select: { projectId: true },
+      });
+
+      if (!fetchSlide) {
+        return new NextResponse("Slide does not exist", { status: 404 });
+      }
+      const projectId = fetchSlide.projectId;
+      const collaborator = await prisma.collaborator.findFirst({
+        where: { userId, projectId },
+      });
+      if (!collaborator) {
+        return new NextResponse("Forbidden", { status: 403 });
+      }
+
+      if (collaborator.role !== "OWNER" && collaborator.role !== "EDITOR") {
+        return new NextResponse("Forbidden", { status: 403 });
+      }
+
+      const update = await prisma.slide.update({
+        where: { id: slideId },
+        data: {
+          title,
+          content,
+        },
+      });
+
+      return NextResponse.json({ update });
+    } catch (err) {
+      console.error("Failed to fetch", err);
+    }
+    return new NextResponse("Internal Server Error", { status: 500 });
 }
