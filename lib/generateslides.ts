@@ -1,67 +1,57 @@
-import { OpenAI } from "openai";
-import { z } from "zod";
+import axios from "axios";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+type Slide = {
+  title: string;
+  content: string;
+};
 
-const SlideSchema = z.object({
-  title: z.string(),
-  content: z.string(),
-});
+export async function generateSlidesFromIdea(idea: string): Promise<Slide[]> {
+  // ...same code
 
-const SlidesArraySchema = z.array(SlideSchema);
+  const response = await axios.post(
+    "https://api.cohere.ai/v1/generate",
+    {
+      model: "command-r-plus",
+      prompt: `Generate a 5-slide startup pitch deck for the idea: "${idea}". Each slide should include a title and 2-3 bullet points. Format:
+Slide 1:
+Title: ...
+- Bullet 1
+- Bullet 2
 
-export async function generateSlidesFromIdea(idea: string) {
-  if (!idea || idea.trim().length < 5) {
-    throw new Error("Invalid idea provided.");
-  }
+Slide 2:
+Title: ...
+- Bullet 1
+...
 
-  const prompt = `
-You are a pitch deck generator AI. Based on the following startup idea, generate a concise and impactful pitch deck with 6–8 slides. 
-
-Each slide should have a "title" and "content". Avoid generic filler. Focus on clarity and startup-quality language.
-
-Return the result in this exact JSON format:
-[
-  {
-    "title": "Slide title here",
-    "content": "Slide content here"
-  }
-]
-
-Startup idea:
-"${idea}"
-`;
-
-  const res = await openai.chat.completions.create({
-    model: "gpt-4",
-    temperature: 0.7,
-    messages: [
-      {
-        role: "system",
-        content:
-          "You are an AI that generates high-quality startup pitch decks in structured JSON format.",
+(Repeat up to Slide 5)`,
+      temperature: 0.7,
+      max_tokens: 500,
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${process.env.COHERE_API_KEY}`,
+        "Content-Type": "application/json",
       },
-      {
-        role: "user",
-        content: prompt,
-      },
-    ],
+    }
+  );
+
+  const raw = response.data.generations?.[0]?.text || "";
+
+  // Parse raw text into slide objects
+  const slideChunks = raw.split(/Slide \d+:/i).filter(Boolean);
+
+  const slides = slideChunks.map((chunk: string) => {
+    const titleMatch = chunk.match(/Title:\s*(.+)/i);
+    const bulletMatches = [...chunk.matchAll(/-\s*(.+)/g)];
+
+    const title = titleMatch?.[1]?.trim() || "Untitled Slide";
+    const content = bulletMatches.map((m) => m[1]).join("\n");
+
+    return {
+      title,
+      content,
+    };
   });
 
-  const rawContent = res.choices[0]?.message?.content;
-
-  if (!rawContent) {
-    throw new Error("No response from OpenAI.");
-  }
-
-  try {
-    const parsed = JSON.parse(rawContent);
-    const slides = SlidesArraySchema.parse(parsed); // validate
-    return slides;
-  } catch (err) {
-    console.error("Slide parsing error:", err);
-    throw new Error("Failed to parse slides from OpenAI.");
-  }
+  return slides;
 }

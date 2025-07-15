@@ -26,7 +26,7 @@ const generateSlides = async () => {
     const { projectId, slides } = res.data;
 
     setSlides(slides);
-    setProjectId(projectId); // store for use in "Continue" button
+    setProjectId(projectId); 
   } catch (error) {
     console.error("Slide generation failed:", error);
   }

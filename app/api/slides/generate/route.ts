@@ -21,6 +21,17 @@ export async function POST(req: NextRequest) {
   try {
     // 1. Generate slides
     const slides = await generateSlidesFromIdea(idea);
+    await prisma.user.upsert({
+      where: { id: userId },
+      update: {}, // nothing to update if exists
+      create: {
+        id: userId,
+        email: "placeholder@example.com", // Replace with real email if available
+        name: "Guest User",
+        imageUrl: null,
+        lastLogin: new Date(),
+      },
+    });
 
     // 2. Create project
     const project = await prisma.project.create({
