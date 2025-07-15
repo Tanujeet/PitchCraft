@@ -3,6 +3,9 @@ import prisma from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 import { nanoid } from "nanoid";
+
+
+
 export async function POST(req: NextRequest) {
   const { userId } = await auth();
   if (!userId) {
