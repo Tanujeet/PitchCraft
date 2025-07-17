@@ -9,8 +9,7 @@ const page = () => {
   const data = [
     { title: "Total Pitch", des: "25" },
     { title: "Total Slides", des: "156" },
-    { title: "Total Views", des: "3245" },
-    { title: "Total Slides", des: "Project phoneix" },
+    { title: "Avg.Slides Per Pitch", des: "3245" },
   ];
 
   return (
