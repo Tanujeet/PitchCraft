@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import {
   Table,
   TableBody,
@@ -10,13 +11,31 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { axiosInstance } from "@/lib/axios";
+
+interface Pitch {
+  title: string;
+  createdAt: string;
+}
 
 const RecentPitches = () => {
-  const dummy = [
-    { title: "Tech Startup", created: "2024-01-15" },
-    { title: "Real Estate", created: "2024-01-20" },
-    { title: "Marketing Campaign", created: "2024-01-25" },
-  ];
+  const [pitches, setPitches] = useState<Pitch[] | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchPitches = async () => {
+      try {
+        const res = await axiosInstance.get("/recent-pitches");
+        setPitches(res.data);
+      } catch (e) {
+        console.error("Failed to fetch recent pitches", e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPitches();
+  }, []);
 
   return (
     <Card className="mt-2">
@@ -33,22 +52,37 @@ const RecentPitches = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {dummy.map((item, idx) => (
-              <TableRow key={idx}>
-                <TableCell>{item.title}</TableCell>
-                <TableCell>
-                  {new Date(item.created).toLocaleDateString()}
-                </TableCell>
-                <TableCell className="text-right space-x-2">
-                  <Button variant="outline" size="sm">
-                    Edit
-                  </Button>
-                  <Button variant="default" size="sm">
-                    View
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
+            {loading
+              ? Array.from({ length: 3 }).map((_, i) => (
+                  <TableRow key={i}>
+                    <TableCell>
+                      <Skeleton className="h-4 w-32" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-4 w-24" />
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Skeleton className="h-8 w-20 inline-block mr-2" />
+                      <Skeleton className="h-8 w-20 inline-block" />
+                    </TableCell>
+                  </TableRow>
+                ))
+              : pitches?.map((item, idx) => (
+                  <TableRow key={idx}>
+                    <TableCell>{item.title}</TableCell>
+                    <TableCell>
+                      {new Date(item.createdAt).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell className="text-right space-x-2">
+                      <Button variant="outline" size="sm">
+                        Edit
+                      </Button>
+                      <Button variant="default" size="sm">
+                        View
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
           </TableBody>
         </Table>
       </CardContent>
