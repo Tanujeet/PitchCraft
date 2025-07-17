@@ -2,6 +2,8 @@
 
 import { useUser } from "@clerk/nextjs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import RecentPitches from "@/components/RecentPitches";
+import QuickAction from "@/components/QuickAction";
 const page = () => {
   const { user } = useUser();
   const username = user?.firstName || "Developer";
@@ -9,7 +11,7 @@ const page = () => {
   const data = [
     { title: "Total Pitch", des: "25" },
     { title: "Total Slides", des: "156" },
-    { title: "Avg.Slides Per Pitch", des: "3245" },
+    { title: "Avg.Slides Per Pitch", des: "10" },
   ];
 
   return (
@@ -20,7 +22,7 @@ const page = () => {
             Welcome back, {username}
           </h1>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mt-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mt-6">
           {data.map((item, idx) => (
             <Card key={idx} className="shadow-md rounded-2xl">
               <CardHeader>
@@ -36,9 +38,13 @@ const page = () => {
         </div>
       </section>
       <section>
-        <div className="mt-35">
+        <div className="mt-15">
           <h1 className="text-3xl font-bold">Recent Activity</h1>
+          <RecentPitches />
         </div>
+      </section>
+      <section>
+        <QuickAction />
       </section>
     </main>
   );
