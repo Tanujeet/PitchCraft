@@ -1,7 +1,5 @@
 const EditSlides = () => {
-  return (
-    <div>EditSlides</div>
-  );
+  return <div>main</div>;
 };
 
 export default EditSlides;
