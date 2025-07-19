@@ -23,7 +23,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { axiosInstance } from "@/lib/axios";
 
 interface Pitch {
-  id: string; // important for fetching slides
+  id: string;
   title: string;
   createdAt: string;
 }
