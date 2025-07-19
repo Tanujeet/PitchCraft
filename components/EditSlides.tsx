@@ -1,7 +1,9 @@
 const EditSlides = () => {
   return (
     <main>
-      <section></section>
+      <section>
+        <div></div>
+      </section>
     </main>
   );
 };
