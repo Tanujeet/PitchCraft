@@ -9,12 +9,21 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { axiosInstance } from "@/lib/axios";
 
 interface Pitch {
+  id: string; // important for fetching slides
   title: string;
   createdAt: string;
 }
@@ -22,6 +31,10 @@ interface Pitch {
 const RecentPitches = () => {
   const [pitches, setPitches] = useState<Pitch[] | null>(null);
   const [loading, setLoading] = useState(true);
+  const [open, setOpen] = useState(false);
+  const [selectedPitchId, setSelectedPitchId] = useState<string | null>(null);
+  const [slides, setSlides] = useState<any[]>([]);
+  const [loadingSlides, setLoadingSlides] = useState(false);
 
   useEffect(() => {
     const fetchPitches = async () => {
@@ -36,6 +49,19 @@ const RecentPitches = () => {
     };
     fetchPitches();
   }, []);
+  const handleViewClick = async (id: string) => {
+    setSelectedPitchId(id);
+    setOpen(true);
+    setLoadingSlides(true);
+    try {
+      const res = await axiosInstance.get(`/slides?projectId=${id}`);
+      setSlides(res.data);
+    } catch (e) {
+      console.error("Failed to fetch slides", e);
+    } finally {
+      setLoadingSlides(false);
+    }
+  };
 
   return (
     <Card className="mt-2">
@@ -77,9 +103,42 @@ const RecentPitches = () => {
                       <Button variant="outline" size="sm">
                         Edit
                       </Button>
-                      <Button variant="default" size="sm">
-                        View
-                      </Button>
+                      <Dialog open={open} onOpenChange={setOpen}>
+                        <DialogTrigger asChild>
+                          <Button
+                            variant="default"
+                            size="sm"
+                            onClick={() => handleViewClick(item.id)}
+                          >
+                            View
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-2xl">
+                          <DialogHeader>
+                            <DialogTitle>Slides of {item.title}</DialogTitle>
+                          </DialogHeader>
+
+                          {loadingSlides ? (
+                            <div className="p-4">Loading slides...</div>
+                          ) : (
+                            <div className="space-y-4 max-h-[70vh] overflow-y-auto">
+                              {slides.map((slide, idx) => (
+                                <div
+                                  key={slide.id}
+                                  className="p-4 border rounded-md"
+                                >
+                                  <h4 className="font-semibold mb-2">
+                                    Slide {idx + 1}
+                                  </h4>
+                                  <p className="text-sm whitespace-pre-wrap">
+                                    {slide.content}
+                                  </p>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </DialogContent>
+                      </Dialog>
                     </TableCell>
                   </TableRow>
                 ))}
