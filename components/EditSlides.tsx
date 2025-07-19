@@ -1,11 +1,5 @@
 const EditSlides = () => {
-  return (
-    <main>
-      <section>
-        <div></div>
-      </section>
-    </main>
-  );
+  return <div></div>;
 };
 
 export default EditSlides;
