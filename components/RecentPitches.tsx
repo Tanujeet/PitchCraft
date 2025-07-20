@@ -63,6 +63,12 @@ const RecentPitches = () => {
     }
   };
 
+  
+  const handleEditClick = async () => {};
+  const handleDeletePitch = async () => {};
+  const handleRegenerateSlides = async () => {};
+  const handleExportToPDF = async () => {};
+
   return (
     <Card className="mt-2">
       <CardHeader>
@@ -100,9 +106,65 @@ const RecentPitches = () => {
                       {new Date(item.createdAt).toLocaleDateString()}
                     </TableCell>
                     <TableCell className="text-right space-x-2">
-                      <Button variant="outline" size="sm">
-                        Edit
-                      </Button>
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEditClick(item.id)}
+                          >
+                            Edit
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-2xl">
+                          <DialogHeader>
+                            <DialogTitle>Edit Pitch - {item.title}</DialogTitle>
+                          </DialogHeader>
+
+                          {loadingSlides ? (
+                            <div className="p-4">Loading slides...</div>
+                          ) : (
+                            <div className="space-y-4 max-h-[70vh] overflow-y-auto">
+                              {slides.map((slide, idx) => (
+                                <div
+                                  key={slide.id}
+                                  className="p-4 border rounded-md"
+                                >
+                                  <h4 className="font-semibold mb-2">
+                                    Slide {idx + 1}
+                                  </h4>
+                                  <p className="text-sm whitespace-pre-wrap">
+                                    {slide.content}
+                                  </p>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+
+                          {/* Buttons */}
+                          <div className="mt-4 flex justify-end gap-2">
+                            <Button
+                              variant="destructive"
+                              onClick={handleDeletePitch}
+                            >
+                              Delete
+                            </Button>
+                            <Button
+                              variant="outline"
+                              onClick={handleRegenerateSlides}
+                            >
+                              Regenerate
+                            </Button>
+                            <Button
+                              variant="default"
+                              onClick={handleExportToPDF}
+                            >
+                              Export to PDF
+                            </Button>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+
                       <Dialog open={open} onOpenChange={setOpen}>
                         <DialogTrigger asChild>
                           <Button
