@@ -98,7 +98,7 @@ const RecentPitches = () => {
     if (!id) return;
     setLoading(true);
     try {
-      const res = await axiosInstance.post("/slides/regenerate", {
+      const res = await axiosInstance.post("/slides/regenrate", {
         projectId: id,
         idea: "Optional updated idea here",
       });
