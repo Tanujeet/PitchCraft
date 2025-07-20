@@ -16,7 +16,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -35,6 +34,7 @@ const RecentPitches = () => {
   const [selectedPitchId, setSelectedPitchId] = useState<string | null>(null);
   const [slides, setSlides] = useState<any[]>([]);
   const [loadingSlides, setLoadingSlides] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     const fetchPitches = async () => {
@@ -49,6 +49,7 @@ const RecentPitches = () => {
     };
     fetchPitches();
   }, []);
+
   const handleViewClick = async (id: string) => {
     setSelectedPitchId(id);
     setOpen(true);
@@ -63,11 +64,55 @@ const RecentPitches = () => {
     }
   };
 
-  
-  const handleEditClick = async () => {};
-  const handleDeletePitch = async () => {};
-  const handleRegenerateSlides = async () => {};
-  const handleExportToPDF = async () => {};
+  const handleEditClick = async (id: string) => {
+    setSelectedPitchId(id);
+    setIsEditing(true);
+    setLoadingSlides(true);
+    try {
+      const res = await axiosInstance.get(`/slides?projectId=${id}`);
+      setSlides(res.data);
+    } catch (e) {
+      console.error("Failed to fetch slides for edit", e);
+    } finally {
+      setLoadingSlides(false);
+    }
+  };
+
+  const handleDeleteProject = async (id: string) => {
+    if (!id) {
+      console.error("Cannot delete: ID is undefined");
+      return;
+    }
+
+    try {
+      await axiosInstance.delete(`/api/projects/${id}`);
+      console.log("Project deleted:", id);
+      // Refresh UI
+      setPitches((prev) => prev?.filter((p) => p.id !== id) || null);
+    } catch (error) {
+      console.error("Failed to delete project", error);
+    }
+  };
+
+  const handleRegenerateSlides = async (id: string) => {
+    if (!id) return;
+    setLoading(true);
+    try {
+      const res = await axiosInstance.post("/slides/regenerate", {
+        projectId: id,
+        idea: "Optional updated idea here",
+      });
+      setSlides(res.data.slides);
+    } catch (error) {
+      console.error("Slide regeneration failed", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleExportToPDF = async () => {
+    // implement export logic
+  };
 
   return (
     <Card className="mt-2">
@@ -99,8 +144,8 @@ const RecentPitches = () => {
                     </TableCell>
                   </TableRow>
                 ))
-              : pitches?.map((item, idx) => (
-                  <TableRow key={idx}>
+              : pitches?.map((item) => (
+                  <TableRow key={item.id}>
                     <TableCell>{item.title}</TableCell>
                     <TableCell>
                       {new Date(item.createdAt).toLocaleDateString()}
@@ -141,17 +186,17 @@ const RecentPitches = () => {
                             </div>
                           )}
 
-                          {/* Buttons */}
                           <div className="mt-4 flex justify-end gap-2">
                             <Button
                               variant="destructive"
-                              onClick={handleDeletePitch}
+                              onClick={() => handleDeleteProject(item.id)}
                             >
                               Delete
                             </Button>
+
                             <Button
                               variant="outline"
-                              onClick={handleRegenerateSlides}
+                              onClick={() => handleRegenerateSlides(item.id)}
                             >
                               Regenerate
                             </Button>
@@ -179,7 +224,6 @@ const RecentPitches = () => {
                           <DialogHeader>
                             <DialogTitle>Slides of {item.title}</DialogTitle>
                           </DialogHeader>
-
                           {loadingSlides ? (
                             <div className="p-4">Loading slides...</div>
                           ) : (
