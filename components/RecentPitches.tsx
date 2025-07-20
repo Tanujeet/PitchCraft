@@ -79,15 +79,8 @@ const RecentPitches = () => {
   };
 
   const handleDeleteProject = async (id: string) => {
-    if (!id) {
-      console.error("Cannot delete: ID is undefined");
-      return;
-    }
-
     try {
       await axiosInstance.delete(`/projects/${id}`);
-      console.log("Project deleted:", id);
-      // Refresh UI
       setPitches((prev) => prev?.filter((p) => p.id !== id) || null);
     } catch (error) {
       console.error("Failed to delete project", error);
@@ -95,8 +88,9 @@ const RecentPitches = () => {
   };
 
   const handleRegenerateSlides = async (id: string) => {
-    if (!id) return;
-    setLoading(true);
+    setSelectedPitchId(id);
+    setIsEditing(true);
+    setLoadingSlides(true);
     try {
       const res = await axiosInstance.post("/slides/regenrate", {
         projectId: id,
@@ -106,7 +100,7 @@ const RecentPitches = () => {
     } catch (error) {
       console.error("Slide regeneration failed", error);
     } finally {
-      setLoading(false);
+      setLoadingSlides(false);
     }
   };
 
@@ -151,106 +145,84 @@ const RecentPitches = () => {
                       {new Date(item.createdAt).toLocaleDateString()}
                     </TableCell>
                     <TableCell className="text-right space-x-2">
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleEditClick(item.id)}
-                          >
-                            Edit
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent className="max-w-2xl">
-                          <DialogHeader>
-                            <DialogTitle>Edit Pitch - {item.title}</DialogTitle>
-                          </DialogHeader>
-
-                          {loadingSlides ? (
-                            <div className="p-4">Loading slides...</div>
-                          ) : (
-                            <div className="space-y-4 max-h-[70vh] overflow-y-auto">
-                              {slides.map((slide, idx) => (
-                                <div
-                                  key={slide.id}
-                                  className="p-4 border rounded-md"
-                                >
-                                  <h4 className="font-semibold mb-2">
-                                    Slide {idx + 1}
-                                  </h4>
-                                  <p className="text-sm whitespace-pre-wrap">
-                                    {slide.content}
-                                  </p>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-
-                          <div className="mt-4 flex justify-end gap-2">
-                            <Button
-                              variant="destructive"
-                              onClick={() => handleDeleteProject(item.id)}
-                            >
-                              Delete
-                            </Button>
-
-                            <Button
-                              variant="outline"
-                              onClick={() => handleRegenerateSlides(item.id)}
-                            >
-                              Regenerate
-                            </Button>
-                            <Button
-                              variant="default"
-                              onClick={handleExportToPDF}
-                            >
-                              Export to PDF
-                            </Button>
-                          </div>
-                        </DialogContent>
-                      </Dialog>
-
-                      <Dialog open={open} onOpenChange={setOpen}>
-                        <DialogTrigger asChild>
-                          <Button
-                            variant="default"
-                            size="sm"
-                            onClick={() => handleViewClick(item.id)}
-                          >
-                            View
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent className="max-w-2xl">
-                          <DialogHeader>
-                            <DialogTitle>Slides of {item.title}</DialogTitle>
-                          </DialogHeader>
-                          {loadingSlides ? (
-                            <div className="p-4">Loading slides...</div>
-                          ) : (
-                            <div className="space-y-4 max-h-[70vh] overflow-y-auto">
-                              {slides.map((slide, idx) => (
-                                <div
-                                  key={slide.id}
-                                  className="p-4 border rounded-md"
-                                >
-                                  <h4 className="font-semibold mb-2">
-                                    Slide {idx + 1}
-                                  </h4>
-                                  <p className="text-sm whitespace-pre-wrap">
-                                    {slide.content}
-                                  </p>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </DialogContent>
-                      </Dialog>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleEditClick(item.id)}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        variant="default"
+                        size="sm"
+                        onClick={() => handleViewClick(item.id)}
+                      >
+                        View
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}
           </TableBody>
         </Table>
       </CardContent>
+
+      <Dialog
+        open={open || isEditing}
+        onOpenChange={(v) => {
+          if (!loadingSlides) {
+            setOpen(false);
+            setIsEditing(false);
+            setSlides([]);
+          }
+        }}
+      >
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>
+              {isEditing ? "Edit Pitch" : "Slides"} -{" "}
+              {pitches?.find((p) => p.id === selectedPitchId)?.title}
+            </DialogTitle>
+          </DialogHeader>
+
+          {loadingSlides ? (
+            <div className="p-4 text-center">⏳ Loading slides...</div>
+          ) : (
+            <div className="space-y-4 max-h-[60vh] overflow-y-auto">
+              {slides.map((slide, idx) => (
+                <div
+                  key={slide.id ?? `slide-${idx}`}
+                  className="p-4 border rounded-md"
+                >
+                  <h4 className="font-semibold mb-2">Slide {idx + 1}</h4>
+                  <p className="text-sm whitespace-pre-wrap">{slide.content}</p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {!loadingSlides && isEditing && (
+            <div className="mt-6 flex justify-between flex-wrap gap-2">
+              <Button
+                variant="destructive"
+                onClick={() => handleDeleteProject(selectedPitchId!)}
+              >
+                🗑 Delete
+              </Button>
+              <div className="ml-auto flex gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => handleRegenerateSlides(selectedPitchId!)}
+                >
+                  🔁 Regenerate
+                </Button>
+                <Button variant="default" onClick={handleExportToPDF}>
+                  📄 Export to PDF
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 };
