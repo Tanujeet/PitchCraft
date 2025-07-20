@@ -213,17 +213,17 @@ const handleDeleteProject = async (id: string) => {
                 variant="destructive"
                 onClick={() => handleDeleteProject(selectedPitchId!)}
               >
-                🗑 Delete
+                Delete
               </Button>
               <div className="ml-auto flex gap-2">
                 <Button
                   variant="outline"
                   onClick={() => handleRegenerateSlides(selectedPitchId!)}
                 >
-                  🔁 Regenerate
+                  Regenerate
                 </Button>
                 <Button variant="default" onClick={handleExportToPDF}>
-                  📄 Export to PDF
+                  Export to PDF
                 </Button>
               </div>
             </div>
