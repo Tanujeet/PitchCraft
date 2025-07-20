@@ -85,7 +85,7 @@ const RecentPitches = () => {
     }
 
     try {
-      await axiosInstance.delete(`/api/projects/${id}`);
+      await axiosInstance.delete(`/projects/${id}`);
       console.log("Project deleted:", id);
       // Refresh UI
       setPitches((prev) => prev?.filter((p) => p.id !== id) || null);
