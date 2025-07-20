@@ -78,14 +78,21 @@ const RecentPitches = () => {
     }
   };
 
-  const handleDeleteProject = async (id: string) => {
-    try {
-      await axiosInstance.delete(`/projects/${id}`);
-      setPitches((prev) => prev?.filter((p) => p.id !== id) || null);
-    } catch (error) {
-      console.error("Failed to delete project", error);
-    }
-  };
+const handleDeleteProject = async (id: string) => {
+  try {
+    await axiosInstance.delete(`/projects/${id}`);
+    setPitches((prev) => prev?.filter((p) => p.id !== id) || null);
+
+    // ✅ Close dialog properly
+    setOpen(false);
+    setIsEditing(false); // <-- this is missing!
+    setSlides([]);
+    setSelectedPitchId(null);
+  } catch (error) {
+    console.error("Failed to delete project", error);
+  }
+};
+
 
   const handleRegenerateSlides = async (id: string) => {
     setSelectedPitchId(id);
