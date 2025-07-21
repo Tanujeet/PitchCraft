@@ -38,8 +38,7 @@ const RecentPitches = () => {
   const [isEditing, setIsEditing] = useState(false);
  
 
-  const params = useParams();
-  const projectId = params.projectId; // this will give you '123' from /project/123
+
 
   useEffect(() => {
     const fetchPitches = async () => {
