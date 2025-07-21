@@ -115,36 +115,32 @@ const RecentPitches = () => {
     }
   };
 
-  const handleExportToPDF = async () => {
-    if (!projectId) {
-      console.error("❌ Project ID missing");
-      return;
-    }
+const handleExportToPDF = async () => {
+  if (!selectedPitchId) {
+    console.error("❌ Project ID (selectedPitchId) missing");
+    return;
+  }
 
-    try {
-      const res = await axiosInstance.get(
-        `/slides/export?projectId=${projectId}`,
-        {
-          responseType: "blob", // 👈 Important to get PDF as a blob
-        }
-      );
-      console.log("📌 Project ID:", projectId);
+  try {
+    const res = await axiosInstance.get(
+      `/slides/export?projectId=${selectedPitchId}`,
+      {
+        responseType: "blob",
+      }
+    );
 
-      console.log("✅ Status Code:", res.status);
-      console.log("📝 Content Type:", res.headers["content-type"]);
+    const blob = new Blob([res.data], { type: "application/pdf" });
+    const url = window.URL.createObjectURL(blob);
 
-      const blob = new Blob([res.data], { type: "application/pdf" });
-      const url = window.URL.createObjectURL(blob);
-
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "pitchcraft_slides.pdf";
-      a.click();
-      window.URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error("❌ PDF generation failed:", error);
-    }
-  };
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "pitchcraft_slides.pdf";
+    a.click();
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error("❌ PDF generation failed:", error);
+  }
+};
 
   return (
     <Card className="mt-2">
