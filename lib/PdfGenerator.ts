@@ -2,12 +2,10 @@ import puppeteer from "puppeteer";
 import { Slide } from "@/types";
 
 export async function generatePdfFromSlides(slides: Slide[]): Promise<Buffer> {
-  // 1. Safety check
   if (!slides || slides.length === 0) {
     throw new Error("Slides array is empty");
   }
 
-  // 2. Build HTML string
   const html = `
     <html>
       <head>
@@ -45,26 +43,21 @@ export async function generatePdfFromSlides(slides: Slide[]): Promise<Buffer> {
   try {
     const browser = await puppeteer.launch({
       headless: true,
-      args: ["--no-sandbox", "--disable-setuid-sandbox"], // For Next.js in serverless
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
     });
 
     const page = await browser.newPage();
-
-    // 3. Set content and wait properly
     await page.setContent(html, {
       waitUntil: ["load", "domcontentloaded", "networkidle0"],
     });
 
     await new Promise((res) => setTimeout(res, 500));
-    // Ensure rendering finishes
 
-    const pdfBuffer = Buffer.from(
-      await page.pdf({ format: "A4", printBackground: true })
-    );
+    // ✅ pdfBuffer is already of type Buffer
+    const pdfBuffer = await page.pdf({ format: "A4", printBackground: true });
 
     await browser.close();
-
-    return pdfBuffer;
+    return Buffer.from(pdfBuffer);
   } catch (err) {
     console.error("🧨 PDF generation failed:", err);
     throw new Error("Failed to generate PDF");

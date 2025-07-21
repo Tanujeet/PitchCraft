@@ -36,8 +36,10 @@ const RecentPitches = () => {
   const [slides, setSlides] = useState<any[]>([]);
   const [loadingSlides, setLoadingSlides] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const searchParams = useSearchParams();
-  const projectId = searchParams.get("projectId");
+ 
+
+  const params = useParams();
+  const projectId = params.projectId; // this will give you '123' from /project/123
 
   useEffect(() => {
     const fetchPitches = async () => {
@@ -114,26 +116,34 @@ const RecentPitches = () => {
   };
 
   const handleExportToPDF = async () => {
-    const res = await fetch(`/api/slides/export?projectId=${projectId}`);
-
-    const status = res.status;
-    const text = await res.text();
-
-    console.log("✅ Status Code:", status);
-    console.log("📝 Response Text:", text);
-
-    if (!res.ok) {
-      throw new Error("Failed to generate PDF");
+    if (!projectId) {
+      console.error("❌ Project ID missing");
+      return;
     }
 
-    const blob = new Blob([text], { type: "application/pdf" });
-    const url = window.URL.createObjectURL(blob);
+    try {
+      const res = await axiosInstance.get(
+        `/slides/export?projectId=${projectId}`,
+        {
+          responseType: "blob", // 👈 Important to get PDF as a blob
+        }
+      );
+      console.log("📌 Project ID:", projectId);
 
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "pitchcraft_slides.pdf";
-    a.click();
-    window.URL.revokeObjectURL(url);
+      console.log("✅ Status Code:", res.status);
+      console.log("📝 Content Type:", res.headers["content-type"]);
+
+      const blob = new Blob([res.data], { type: "application/pdf" });
+      const url = window.URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "pitchcraft_slides.pdf";
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("❌ PDF generation failed:", error);
+    }
   };
 
   return (
