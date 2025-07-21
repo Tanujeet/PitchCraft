@@ -15,7 +15,7 @@ const Pricing = () => {
           <h3 className="text-2xl font-semibold text-gray-900">Free</h3>
           <p className="mt-2 text-gray-600">Perfect to test the waters</p>
           <p className="mt-4 text-3xl font-bold text-gray-900">
-            $0{" "}
+            $0
             <span className="text-base font-medium text-gray-500">/month</span>
           </p>
           <ul className="mt-6 space-y-3 text-gray-700">
