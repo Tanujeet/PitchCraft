@@ -246,3 +246,15 @@ const handleDeleteProject = async (id: string) => {
 };
 
 export default RecentPitches;
+
+
+
+
+
+
+
+
+
+
+
+
