@@ -23,7 +23,7 @@ const Pricing = () => {
             <li>✅ AI pitch deck generation</li>
             <li>⚠️ Limited export (no PDF)</li>
           </ul>
-          <button className="mt-8 w-full bg-black text-white py-3 rounded-xl hover:bg-gray-900 transition">
+          <button className="mt-26 w-full bg-black text-white py-3 rounded-xl hover:bg-gray-900 transition ">
             Get Started
           </button>
         </div>

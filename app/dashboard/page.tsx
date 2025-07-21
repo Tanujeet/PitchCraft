@@ -41,7 +41,7 @@ const Page = () => {
     : [];
 
   return (
-    <main className="px-6 py-16">
+    <main className="px-6 py-16 ">
       <section>
         <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
           <h1 className="text-3xl sm:text-4xl font-bold text-center sm:text-left">

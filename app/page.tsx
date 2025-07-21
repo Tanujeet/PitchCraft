@@ -41,7 +41,7 @@ export default function HomePage() {
             {/* Get Started Button (Sign In link) */}
             <Link href="/sign-in">
               <Button className="px-6 py-2 bg-black text-white font-medium rounded-3xl hover:bg-gray-800 transition mt-10">
-                Get Started
+                Create new pitch
               </Button>
             </Link>
           </div>
