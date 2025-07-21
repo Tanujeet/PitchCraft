@@ -36,7 +36,7 @@ const Pricing = () => {
           <h3 className="text-2xl font-semibold text-gray-900">Pro</h3>
           <p className="mt-2 text-gray-600">For serious founders & teams</p>
           <p className="mt-4 text-3xl font-bold text-gray-900">
-            $29{" "}
+            $29
             <span className="text-base font-medium text-gray-500">/month</span>
           </p>
           <ul className="mt-6 space-y-3 text-gray-700">
