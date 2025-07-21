@@ -14,11 +14,13 @@ export async function GET(req: NextRequest) {
   if (!projectId) {
     return new NextResponse("failed to get projectId", { status: 401 });
   }
+
   try {
     const slides = await prisma.slide.findMany({
       where: { projectId },
       orderBy: { order: "asc" },
     });
+
     const formattedSlides = slides.map((slide) => ({
       ...slide,
       content:
@@ -27,8 +29,12 @@ export async function GET(req: NextRequest) {
           : JSON.stringify(slide.content || ""),
     }));
 
-    const pdf = await generatePdfFromSlides(formattedSlides);
-    return new NextResponse(new Uint8Array(pdf), {
+    const pdfBuffer = await generatePdfFromSlides(formattedSlides);
+
+    // Convert Node.js Buffer to Uint8Array
+    const pdfData = new Uint8Array(pdfBuffer);
+
+    return new NextResponse(pdfData, {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",
