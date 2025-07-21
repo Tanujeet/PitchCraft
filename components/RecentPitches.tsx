@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { axiosInstance } from "@/lib/axios";
+import { useParams, useSearchParams } from "next/navigation";
 
 interface Pitch {
   id: string;
@@ -35,6 +36,8 @@ const RecentPitches = () => {
   const [slides, setSlides] = useState<any[]>([]);
   const [loadingSlides, setLoadingSlides] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const searchParams = useSearchParams();
+  const projectId = searchParams.get("projectId");
 
   useEffect(() => {
     const fetchPitches = async () => {
@@ -78,21 +81,20 @@ const RecentPitches = () => {
     }
   };
 
-const handleDeleteProject = async (id: string) => {
-  try {
-    await axiosInstance.delete(`/projects/${id}`);
-    setPitches((prev) => prev?.filter((p) => p.id !== id) || null);
+  const handleDeleteProject = async (id: string) => {
+    try {
+      await axiosInstance.delete(`/projects/${id}`);
+      setPitches((prev) => prev?.filter((p) => p.id !== id) || null);
 
-    // ✅ Close dialog properly
-    setOpen(false);
-    setIsEditing(false); // <-- this is missing!
-    setSlides([]);
-    setSelectedPitchId(null);
-  } catch (error) {
-    console.error("Failed to delete project", error);
-  }
-};
-
+      // ✅ Close dialog properly
+      setOpen(false);
+      setIsEditing(false); // <-- this is missing!
+      setSlides([]);
+      setSelectedPitchId(null);
+    } catch (error) {
+      console.error("Failed to delete project", error);
+    }
+  };
 
   const handleRegenerateSlides = async (id: string) => {
     setSelectedPitchId(id);
@@ -112,7 +114,26 @@ const handleDeleteProject = async (id: string) => {
   };
 
   const handleExportToPDF = async () => {
-    // implement export logic
+    const res = await fetch(`/api/slides/export?projectId=${projectId}`);
+
+    const status = res.status;
+    const text = await res.text();
+
+    console.log("✅ Status Code:", status);
+    console.log("📝 Response Text:", text);
+
+    if (!res.ok) {
+      throw new Error("Failed to generate PDF");
+    }
+
+    const blob = new Blob([text], { type: "application/pdf" });
+    const url = window.URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "pitchcraft_slides.pdf";
+    a.click();
+    window.URL.revokeObjectURL(url);
   };
 
   return (

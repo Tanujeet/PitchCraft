@@ -1,20 +1,13 @@
-import chromium from "@sparticuz/chromium";
-import puppeteer from "puppeteer-core";
-
-interface Slide {
-  title: string;
-  content: string;
-}
+import puppeteer from "puppeteer"; // ⬅️ Use this in local env
+import { Slide } from "@/types";
 
 export async function generatePdfFromSlides(slides: Slide[]): Promise<Buffer> {
   const html = `
     <html>
       <head>
         <style>
-          body { font-family: sans-serif; padding: 40px; }
-          .slide { page-break-after: always; margin-bottom: 40px; }
-          .title { font-size: 24px; font-weight: bold; margin-bottom: 12px; }
-          .point { margin-bottom: 8px; }
+          body { font-family: Arial; padding: 2rem; }
+          .slide { page-break-after: always; margin-bottom: 2rem; }
         </style>
       </head>
       <body>
@@ -22,11 +15,8 @@ export async function generatePdfFromSlides(slides: Slide[]): Promise<Buffer> {
           .map(
             (slide) => `
               <div class="slide">
-                <div class="title">${slide.title}</div>
-                ${slide.content
-                  .split("\n")
-                  .map((point) => `<div class="point">• ${point}</div>`)
-                  .join("")}
+                <h2>${slide.title}</h2>
+                <p>${slide.content}</p>
               </div>
             `
           )
@@ -35,22 +25,24 @@ export async function generatePdfFromSlides(slides: Slide[]): Promise<Buffer> {
     </html>
   `;
 
-  const browser = await puppeteer.launch({
-    args: chromium.args,
-    executablePath: await chromium.executablePath(),
-    headless: true,
- 
-  });
+  try {
+    const browser = await puppeteer.launch({
+      headless: true, // Fully headless
+    });
 
-  const page = await browser.newPage();
-  await page.setContent(html, { waitUntil: "networkidle0" });
+    const page = await browser.newPage();
+    await page.setContent(html, { waitUntil: "networkidle0" });
 
-  const uint8Pdf = await page.pdf({
-    format: "A4",
-    printBackground: true,
-  });
+    const pdf = await page.pdf({
+      format: "A4",
+      printBackground: true,
+    });
 
-  await browser.close();
+    await browser.close();
 
-  return Buffer.from(uint8Pdf); 
+    return pdf;
+  } catch (err) {
+    console.error("🧨 PDF generation failed:", err);
+    throw new Error("Failed to generate PDF");
+  }
 }
