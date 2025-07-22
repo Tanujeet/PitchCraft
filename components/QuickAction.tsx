@@ -11,7 +11,6 @@ const QuickAction = () => {
         <Button onClick={() => router.push("/create")}>
           Generate New Pitch
         </Button>
-        <Button variant="outline">Import Pitch from PDF</Button>
       </div>
     </section>
   );
