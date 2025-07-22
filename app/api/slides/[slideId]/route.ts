@@ -51,14 +51,12 @@ export async function PATCH(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { slideId: string } }
+  context: { params: { slideId: string } }
 ) {
   const { userId } = await auth();
-  if (!userId) {
-    return new NextResponse("Unauthorised", { status: 401 });
-  }
+  if (!userId) return new NextResponse("Unauthorised", { status: 401 });
 
-  const slideId = params.slideId;
+  const slideId = context.params.slideId;
 
   try {
     const fetch = await prisma.slide.findUnique({
@@ -66,27 +64,22 @@ export async function DELETE(
       select: { projectId: true },
     });
 
-    if (!fetch) {
-      return new NextResponse("Slides does not exist", { status: 404 });
-    }
+    if (!fetch)
+      return new NextResponse("Slide does not exist", { status: 404 });
 
     const projectId = fetch.projectId;
-
     const collaborator = await prisma.collaborator.findFirst({
       where: { userId, projectId },
     });
 
-    if (!collaborator) {
-      return new NextResponse("Collaborator", { status: 404 });
-    }
-    if (collaborator.role !== "OWNER" && collaborator.role !== "EDITOR") {
+    if (!collaborator || !["OWNER", "EDITOR"].includes(collaborator.role)) {
       return new NextResponse("Forbidden", { status: 403 });
     }
 
     const deletedSlide = await prisma.slide.delete({ where: { id: slideId } });
     return NextResponse.json({ success: true, deleted: deletedSlide });
   } catch (error) {
-      console.error("Failed to delete", error);
-        return new NextResponse("Internal Server Error", { status: 500 });
+    console.error("Failed to delete", error);
+    return new NextResponse("Internal Server Error", { status: 500 });
   }
 }
