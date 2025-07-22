@@ -1,18 +1,18 @@
 import { generateSlidesFromIdea } from "@/lib/generateslides";
 import prisma from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
 export async function POST(
-  req: NextRequest,
-  { params }: { params: { projectId: string } }
+  req: Request,
+  { params: paramsPromise }: { params: Promise<{ projectId: string }> }
 ) {
   const { userId } = await auth();
   if (!userId) {
     return new NextResponse("Unauthorised", { status: 401 });
   }
 
-  const projectId = params.projectId;
+  const { projectId } = await paramsPromise;
 
   try {
     const collaborator = await prisma.collaborator.findFirst({

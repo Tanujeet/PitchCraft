@@ -1,19 +1,19 @@
 // /app/api/project/[projectId]/route.ts
 
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 
 export async function DELETE(
-  req: NextRequest,
-  context: { params: { projectId: string } }
+  req: Request,
+  { params: paramsPromise }: { params: Promise<{ projectId: string }> }
 ) {
   const { userId } = await auth();
   if (!userId) {
     return new NextResponse("Unauthorized", { status: 401 });
   }
 
-  const projectId = context.params.projectId;
+  const { projectId } = await paramsPromise;
 
   try {
     const project = await prisma.project.findUnique({
