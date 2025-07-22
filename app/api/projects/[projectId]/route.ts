@@ -6,14 +6,14 @@ import { auth } from "@clerk/nextjs/server";
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { projectId: string } }
+  context: { params: { projectId: string } }
 ) {
   const { userId } = await auth();
   if (!userId) {
     return new NextResponse("Unauthorized", { status: 401 });
   }
 
-  const projectId = params.projectId;
+  const projectId = context.params.projectId;
 
   try {
     const project = await prisma.project.findUnique({
