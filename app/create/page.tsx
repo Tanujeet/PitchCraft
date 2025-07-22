@@ -93,7 +93,7 @@ const Page = () => {
                     <Slides slides={slides} />
 
                     <Button
-                      onClick={() => router.push(`/projects/${projectId}`)}
+                      onClick={() => router.push("/dashboard")}
                       className="mt-6 w-full"
                     >
                       Continue to Editor
