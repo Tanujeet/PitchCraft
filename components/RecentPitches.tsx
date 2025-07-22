@@ -14,13 +14,12 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { axiosInstance } from "@/lib/axios";
-import { useParams, useSearchParams } from "next/navigation";
+
 
 interface Pitch {
   id: string;
