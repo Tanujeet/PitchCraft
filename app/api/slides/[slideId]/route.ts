@@ -5,12 +5,12 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function PATCH(
   req: NextRequest,
-  context: { params: { slideId: string } }
+  { params: paramsPromise }: { params: Promise<{ slideId: string }> }
 ) {
   const { userId } = await auth();
   if (!userId) return new NextResponse("Unauthorised", { status: 401 });
 
-  const slideId = context.params.slideId;
+  const { slideId } = await paramsPromise;
   const body = await req.json();
   const { title, content } = body;
 
