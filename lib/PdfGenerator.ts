@@ -1,4 +1,5 @@
-import puppeteer from "puppeteer";
+import chromium from "chrome-aws-lambda";
+import puppeteer from "puppeteer-core";
 import { Slide } from "@/types";
 
 export async function generatePdfFromSlides(slides: Slide[]): Promise<Buffer> {
@@ -42,8 +43,9 @@ export async function generatePdfFromSlides(slides: Slide[]): Promise<Buffer> {
 
   try {
     const browser = await puppeteer.launch({
-      headless: true,
-      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+      args: chromium.args,
+      executablePath: await chromium.executablePath,
+      headless: chromium.headless,
     });
 
     const page = await browser.newPage();
@@ -53,8 +55,7 @@ export async function generatePdfFromSlides(slides: Slide[]): Promise<Buffer> {
 
     await new Promise((res) => setTimeout(res, 500));
 
-    // ✅ pdfBuffer is already of type Buffer
-    const pdfBuffer = await page.pdf({ format: "A4", printBackground: true });
+    const pdfBuffer = await page.pdf({ format: "a4", printBackground: true });
 
     await browser.close();
     return Buffer.from(pdfBuffer);
