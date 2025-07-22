@@ -50,13 +50,13 @@ export async function PATCH(
 
 
 export async function DELETE(
-  req: NextRequest,
-  context: { params: { slideId: string } }
+  req: Request,
+  { params: paramsPromise }: { params: Promise<{ slideId: string }> }
 ) {
   const { userId } = await auth();
   if (!userId) return new NextResponse("Unauthorised", { status: 401 });
 
-  const slideId = context.params.slideId;
+  const { slideId } = await paramsPromise;
 
   try {
     const fetch = await prisma.slide.findUnique({
