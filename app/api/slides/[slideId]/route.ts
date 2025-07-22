@@ -5,16 +5,15 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { slideId: string } }
+  context: { params: { slideId: string } }
 ) {
   const { userId } = await auth();
-  if (!userId) {
-    return new NextResponse("Unauthorised", { status: 401 });
-  }
+  if (!userId) return new NextResponse("Unauthorised", { status: 401 });
 
-  const slideId = params.slideId;
+  const slideId = context.params.slideId;
   const body = await req.json();
   const { title, content } = body;
+
   if (!title?.trim() || !content?.trim()) {
     return new NextResponse("Invalid input", { status: 400 });
   }
@@ -25,35 +24,30 @@ export async function PATCH(
       select: { projectId: true },
     });
 
-    if (!fetchSlide) {
+    if (!fetchSlide)
       return new NextResponse("Slide does not exist", { status: 404 });
-    }
+
     const projectId = fetchSlide.projectId;
     const collaborator = await prisma.collaborator.findFirst({
       where: { userId, projectId },
     });
-    if (!collaborator) {
-      return new NextResponse("Forbidden", { status: 403 });
-    }
 
-    if (collaborator.role !== "OWNER" && collaborator.role !== "EDITOR") {
+    if (!collaborator || !["OWNER", "EDITOR"].includes(collaborator.role)) {
       return new NextResponse("Forbidden", { status: 403 });
     }
 
     const update = await prisma.slide.update({
       where: { id: slideId },
-      data: {
-        title,
-        content,
-      },
+      data: { title, content },
     });
 
     return NextResponse.json({ update });
   } catch (err) {
-    console.error("Failed to fetch", err);
+    console.error("Failed to update", err);
+    return new NextResponse("Internal Server Error", { status: 500 });
   }
-  return new NextResponse("Internal Server Error", { status: 500 });
 }
+
 
 export async function DELETE(
   req: NextRequest,
