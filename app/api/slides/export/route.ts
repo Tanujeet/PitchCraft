@@ -2,6 +2,8 @@ import { generatePdfFromSlides } from "@/lib/PdfGenerator";
 import prisma from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
+
+
 export const runtime = "nodejs"; // 👈 This is critical
 
 export async function GET(req: NextRequest) {
