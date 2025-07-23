@@ -24,7 +24,7 @@ export async function generatePdfFromSlides(slides: any[]) {
   `;
 
   const response = await axios.post(
-    `https://chrome.browserless.io/pdf?token=${BROWSERLESS_API_KEY}`,
+    `https://production-sfo.browserless.io/pdf?token=${BROWSERLESS_API_KEY}`,
     {
       html, // the HTML content you want to render as PDF
     },
