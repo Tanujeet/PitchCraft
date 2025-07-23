@@ -1,13 +1,9 @@
-import puppeteer from "puppeteer";
+// lib/pdf.ts
+import axios from "axios";
+
+const BROWSERLESS_API_KEY = process.env.BROWSERLESS_API_KEY!; // set this in Vercel env
 
 export async function generatePdfFromSlides(slides: any[]) {
-  const browser = await puppeteer.launch({
-    headless: true, // ✅ Use true instead of "new"
-    args: ["--no-sandbox", "--disable-setuid-sandbox"],
-  });
-
-  const page = await browser.newPage();
-
   const html = `
     <html>
       <head>
@@ -27,11 +23,18 @@ export async function generatePdfFromSlides(slides: any[]) {
     </html>
   `;
 
-  await page.setContent(html, { waitUntil: "networkidle0" });
+  const response = await axios.post(
+    `https://chrome.browserless.io/pdf?token=${BROWSERLESS_API_KEY}`,
+    {
+      html, // the HTML content you want to render as PDF
+    },
+    {
+      responseType: "arraybuffer", // so you get back a binary PDF buffer
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
 
-  const pdfBuffer = await page.pdf({ format: "A4" });
-
-  await browser.close();
-
-  return pdfBuffer;
+  return response.data; // PDF buffer
 }
