@@ -3,8 +3,7 @@ import prisma from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 import { nanoid } from "nanoid";
-
-
+import { clerkClient } from "@clerk/clerk-sdk-node";
 
 export async function POST(req: NextRequest) {
   const { userId } = await auth();
@@ -13,27 +12,37 @@ export async function POST(req: NextRequest) {
   }
 
   const { idea } = await req.json();
-
   if (!idea || idea.trim().length < 5) {
     return new NextResponse("Idea is required", { status: 400 });
   }
 
   try {
-    // 1. Generate slides
-    const slides = await generateSlidesFromIdea(idea);
+    // Get user data from Clerk
+    const user = await clerkClient.users.getUser(userId);
+    const email =
+      user?.emailAddresses?.[0]?.emailAddress || `guest_${userId}@example.com`;
+    const name = user?.firstName || "Guest User";
+    const imageUrl = user?.imageUrl || null;
+
+    // 1. Create or update user
     await prisma.user.upsert({
       where: { id: userId },
-      update: {}, // nothing to update if exists
+      update: {
+        lastLogin: new Date(),
+      },
       create: {
         id: userId,
-        email: "placeholder@example.com", // Replace with real email if available
-        name: "Guest User",
-        imageUrl: null,
+        email,
+        name,
+        imageUrl,
         lastLogin: new Date(),
       },
     });
 
-    // 2. Create project
+    // 2. Generate slides
+    const slides = await generateSlidesFromIdea(idea);
+
+    // 3. Create project
     const project = await prisma.project.create({
       data: {
         title: idea.slice(0, 50),
@@ -42,7 +51,7 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // 3. Add user as OWNER collaborator
+    // 4. Add user as owner collaborator
     await prisma.collaborator.create({
       data: {
         projectId: project.id,
@@ -51,7 +60,7 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // 4. Save all slides
+    // 5. Save slides in DB
     await prisma.$transaction(
       slides.map((slide, index) =>
         prisma.slide.create({
@@ -65,7 +74,7 @@ export async function POST(req: NextRequest) {
       )
     );
 
-    // 5. Return success
+    // 6. Return response
     return NextResponse.json({
       projectId: project.id,
       slides,
