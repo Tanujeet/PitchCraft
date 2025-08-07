@@ -1,36 +1,109 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🚀 PitchCraft – AI-Powered Pitch Deck Generator
 
-## Getting Started
+**PitchCraft** is a fullstack SaaS application that empowers founders and startups to create compelling, AI-generated pitch decks in minutes. Just enter your startup idea, and PitchCraft will generate a complete investor-ready pitch deck—with editable slides, collaboration, analytics, and premium export options.
 
-First, run the development server:
+---
+
+## 🧠 Features
+
+- ⚡ **AI-Powered Slide Generation**  
+  Generate a full pitch deck from a single startup idea using OpenAI.
+
+- ✍️ **Editable Slides**  
+  Manually customize slide content using a clean, intuitive editor.
+
+- 📊 **Dashboard Analytics**  
+  Track pitch creation history, edit stats, and performance insights.
+
+- 📁 **Project & Slide Management**  
+  Organize slides into pitch projects, with support for multiple decks.
+
+- 🤝 **Collaboration (Planned)**  
+  Invite team members to collaborate on your deck in real-time.
+
+- 📤 **PDF Export**  
+  Download your deck as a professional PDF—perfect for sharing with investors.
+
+- 💳 **Stripe-Based Premium Features**  
+  Monetize with a tiered system: export, collaboration, and advanced AI features.
+
+---
+
+## 🧰 Tech Stack
+
+| Layer         | Tech                             |
+|---------------|----------------------------------|
+| Frontend      | Next.js 14 (App Router), React.js, Tailwind CSS, ShadCN UI |
+| Backend       | Next.js API Routes, OpenAI API, Stripe API |
+| Database      | PostgreSQL + Prisma ORM          |
+| Auth          | Clerk (User authentication)      |
+| Deployment    | Vercel / Railway / Render        |
+
+---
+
+## 📸 Screenshots
+
+> Coming soon — UI previews of pitch creation, editor, and dashboard.
+
+---
+
+## 🛠️ Getting Started
+
+### 1. Clone the repo
 
 ```bash
-npm run dev
+git clone https://github.com/your-username/pitchcraft.git
+cd pitchcraft
+
+
+2. Install dependencies
+pnpm install
 # or
-yarn dev
-# or
+npm install
+
+3. Setup environment variables
+DATABASE_URL=your_postgresql_url
+OPENAI_API_KEY=your_openai_key
+STRIPE_SECRET_KEY=your_stripe_key
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_key
+CLERK_SECRET_KEY=your_clerk_secret
+
+4. Run development server
 pnpm dev
 # or
-bun dev
-```
+npm run dev
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+🧪 Features in Progress
+✅ Slide generation (Done)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+✅ Project and slide CRUD (Done)
 
-## Learn More
+✅ Stripe billing integration (Done)
 
-To learn more about Next.js, take a look at the following resources:
+🔄 Real-time collaboration (Planned)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+🔄 Deck templates (Planned)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+🔄 AI slide rewriter or enhancer (Planned)
 
-## Deploy on Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+✨ Inspiration
+PitchCraft was born out of the need to simplify the process of building investor decks, especially for early-stage founders who need speed, clarity, and quality—all powered by AI.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+📄 License
+This project is licensed under the MIT License.
+
+🙋‍♂️ Author
+Tanujeet Singh
+Full Stack Developer | Building SaaS & AI tools
+Portfolio • LinkedIn • Twitter • GitHub
+
+⭐️ Show Your Support
+If you find this project useful:
+
+Give it a ⭐️ on GitHub
+
+Share with your startup network
+
+Contribute or open issues for improvements
