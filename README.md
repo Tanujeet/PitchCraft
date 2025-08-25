@@ -1,107 +1,81 @@
-# 🚀 PitchCraft – AI-Powered Pitch Deck Generator
+**PitchCraft**
+**"Transform your ideas into engaging presentations"**
 
-**PitchCraft** is a fullstack SaaS application that empowers founders and startups to create compelling, AI-generated pitch decks in minutes. Just enter your startup idea, and PitchCraft will generate a complete investor-ready pitch deck—with editable slides, collaboration, analytics, and premium export options.
+📖 **Description**
 
----
+PitchCraft is a React-based project that enables you to generate stunning presentations from your ideas. The project utilizes OpenAI, Browserless, and Prisma to create a seamless experience for users. With PitchCraft, you can focus on crafting your message while the technology handles the heavy lifting.
 
-## 🧠 Features
+The project consists of several components, including API integration, middleware, and a robust file structure. We'll dive deeper into each of these components in the following sections.
 
-- ⚡ **AI-Powered Slide Generation**  
-  Generate a full pitch deck from a single startup idea using OpenAI.
+✨ **Features**
 
-- ✍️ **Editable Slides**  
-  Manually customize slide content using a clean, intuitive editor.
+1. **OpenAI Integration**: Utilize OpenAI's powerful language model to generate slides from your ideas.
+2. **Browserless API**: Leverage Browserless's headless browser technology to render your slides as PDFs.
+3. **Prisma Database**: Store and manage your presentation data using Prisma's robust database solution.
+4. **Middleware**: Implement authentication and authorization using Clerk's middleware solution.
+5. **API Endpoints**: Expose a range of API endpoints for generating slides, retrieving project data, and more.
+6. **Frontend**: Build a responsive and user-friendly frontend using React and TypeScript.
+7. **Deployment**: Deploy your project using Vercel's serverless platform.
+8. **Error Handling**: Implement robust error handling and logging mechanisms to ensure a smooth user experience.
+9. **Testing**: Write comprehensive tests for your project using Jest and Cypress.
+10. **Documentation**: Generate this README file to provide a comprehensive guide for users and contributors.
 
-- 📊 **Dashboard Analytics**  
-  Track pitch creation history, edit stats, and performance insights.
+🧰 **Tech Stack Table**
 
-- 📁 **Project & Slide Management**  
-  Organize slides into pitch projects, with support for multiple decks.
+| Category | Technology |
+| --- | --- |
+| Frontend | React, TypeScript, Tailwind CSS |
+| Backend | Node.js, Prisma, OpenAI, Browserless |
+| Middleware | Clerk |
+| Database | Prisma |
+| Deployment | Vercel |
 
-- 🤝 **Collaboration (Planned)**  
-  Invite team members to collaborate on your deck in real-time.
+📁 **Project Structure**
 
-- 📤 **PDF Export**  
-  Download your deck as a professional PDF—perfect for sharing with investors.
+The project consists of the following folders and files:
 
-- 💳 **Stripe-Based Premium Features**  
-  Monetize with a tiered system: export, collaboration, and advanced AI features.
+* `components`: React components used throughout the application
+* `lib`: Library files containing utility functions and APIs
+* `pages`: React pages for the frontend application
+* `public`: Public assets and files
+* `api`: API endpoint files
+* `middleware`: Middleware files for authentication and authorization
+* `prisma`: Prisma database configuration files
+* `utils`: Utility files for tasks such as formatting and validation
 
----
+⚙️ **How to Run**
 
-## 🧰 Tech Stack
+To run the project, follow these steps:
 
-| Layer         | Tech                             |
-|---------------|----------------------------------|
-| Frontend      | Next.js 14 (App Router), React.js, Tailwind CSS, ShadCN UI |
-| Backend       | Next.js API Routes, OpenAI API, Stripe API |
-| Database      | PostgreSQL + Prisma ORM          |
-| Auth          | Clerk (User authentication)      |
-| Deployment    | Vercel / Railway / Render        |
+1. Install dependencies using `npm install`
+2. Set environment variables for OpenAI and Browserless API keys
+3. Run `npm run dev` to start the development server
+4. Build the project using `npm run build`
+5. Deploy the project using Vercel's serverless platform
 
----
+🧪 **Testing Instructions**
 
-## 📸 Screenshots
+To run tests, follow these steps:
 
-> Coming soon — UI previews of pitch creation, editor, and dashboard.
+1. Install dependencies using `npm install`
+2. Run `npm run test` to execute Jest tests
+3. Run `npm run cypress` to execute Cypress tests
 
----
+📸 **Screenshots**
 
-## 🛠️ Getting Started
+[Insert screenshots of the project in action]
 
-### 1. Clone the repo
+📦 **API Reference**
 
-```bash
-git clone https://github.com/your-username/pitchcraft.git
-cd pitchcraft
+[Insert API reference documentation for the project]
 
+👤 **Tanujeet Singh**
 
-2. Install dependencies
-pnpm install
-# or
-npm install
+This project was created by Tanujeet Singh
 
-3. Setup environment variables
-DATABASE_URL=your_postgresql_url
-OPENAI_API_KEY=your_openai_key
-STRIPE_SECRET_KEY=your_stripe_key
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_key
-CLERK_SECRET_KEY=your_clerk_secret
+📝 **License**
 
-4. Run development server
-pnpm dev
-# or
-npm run dev
-
-
-🧪 Features in Progress
-✅ Slide generation (Done)
-
-✅ Project and slide CRUD (Done)
-
-✅ Stripe billing integration (Done)
-
-🔄 Real-time collaboration (Planned)
-
-🔄 Deck templates (Planned)
-
-🔄 AI slide rewriter or enhancer (Planned)
-
-
-✨ Inspiration
-PitchCraft was born out of the need to simplify the process of building investor decks, especially for early-stage founders who need speed, clarity, and quality—all powered by AI.
-
-📄 License
 This project is licensed under the MIT License.
-
-🙋‍♂️ Author
-Tanujeet Singh
-Full Stack Developer | Building SaaS & AI tools
-Portfolio • LinkedIn • Twitter • GitHub
-
-⭐️ Show Your Support
-If you find this project useful:
-
 Give it a ⭐️ on GitHub
 
 Share with your startup network
