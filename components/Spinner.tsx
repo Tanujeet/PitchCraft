@@ -1,6 +1,7 @@
-// components/ui/Spinner.tsx
 export const Spinner = () => (
-  <div className="flex items-center justify-center">
-    <div className="w-6 h-6 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+  <div className="flex items-center justify-center space-x-2">
+    <div className="w-3 h-3 bg-blue-500 rounded-full animate-bounce" />
+    <div className="w-3 h-3 bg-purple-500 rounded-full animate-bounce [animation-delay:0.2s]" />
+    <div className="w-3 h-3 bg-pink-500 rounded-full animate-bounce [animation-delay:0.4s]" />
   </div>
 );
