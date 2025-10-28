@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import Link from "next/link";
+import { Spinner } from "@/components/Spinner";
 
 export default function HomePage() {
   const { user, isLoaded } = useUser();
@@ -20,7 +21,7 @@ export default function HomePage() {
     }
   }, [isLoaded, user]);
 
-  if (!isLoaded) return <div>Loading...</div>;
+  if (!isLoaded) return <Spinner />;
 
   return (
     <main>
