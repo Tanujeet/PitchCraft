@@ -21,7 +21,12 @@ export default function HomePage() {
     }
   }, [isLoaded, user]);
 
-  if (!isLoaded) return <Spinner />;
+  if (!isLoaded)
+    return (
+      <div className="flex justify-center items-center">
+        <Spinner />
+      </div>
+    );
 
   return (
     <main>
