@@ -7,15 +7,15 @@ type Slide = {
   content: string;
 };
 
-export async function generateSlidesFromIdea(idea: string): Promise<Slide[]> {
-  const response = await axios.post(
-    "https://api.cohere.ai/v1/generate",
+export async function generateSlidesFromIdea(idea: string) {
+  const res = await axios.post(
+    "https://api.cohere.com/v1/chat",
     {
-      model: "command-r-plus",
-      prompt: `You're an expert pitch deck creator.
-Generate a **10-slide** startup pitch deck for the idea: "${idea}".
-Each slide should contain a **Slide Title** and **3 to 4 detailed bullet points**.
-Use this format:
+      model: "command-a-03-2025", // 🔥 EXACT MODEL ID
+      message: `
+Generate a 10-slide startup pitch deck for the idea: "${idea}"
+
+Format strictly:
 
 Slide 1:
 Title: ...
@@ -23,39 +23,28 @@ Title: ...
 - Bullet 2
 - Bullet 3
 
-Slide 2:
-Title: ...
-- Bullet 1
-...
-
-(Continue up to Slide 10). Keep bullets insightful and professional.`,
-      temperature: 0.6,
-      max_tokens: 1000,
+Continue till Slide 10.
+No extra text.
+      `,
     },
     {
       headers: {
         Authorization: `Bearer ${process.env.COHERE_API_KEY}`,
         "Content-Type": "application/json",
+        "Cohere-Version": "2024-12-06",
       },
     },
   );
 
-  const raw = response.data.generations?.[0]?.text || "";
+  const raw = res.data.text || "";
 
-  const slideChunks = raw.split(/Slide \d+:/i).filter(Boolean);
-
-  const slides = slideChunks.map((chunk: string) => {
-    const titleMatch = chunk.match(/Title:\s*(.+)/i);
-    const bulletMatches = [...chunk.matchAll(/-\s*(.+)/g)];
-
-    const title = titleMatch?.[1]?.trim() || "Untitled Slide";
-    const content = bulletMatches.map((m) => m[1]).join("\n");
-
-    return {
-      title,
-      content,
-    };
-  });
-
-  return slides;
+  return raw
+    .split(/Slide \d+:/i)
+    .filter(Boolean)
+    .map((chunk: string) => {
+      const title = chunk.match(/Title:\s*(.+)/i)?.[1] ?? "Untitled";
+      const bullets = [...chunk.matchAll(/-\s*(.+)/g)].map((m) => m[1]);
+      return { title, content: bullets.join("\n") };
+    });
 }
+
