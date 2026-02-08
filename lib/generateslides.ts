@@ -1,3 +1,5 @@
+// DEBUG: test change Feb 2026
+
 import axios from "axios";
 
 type Slide = {
@@ -35,12 +37,11 @@ Title: ...
         Authorization: `Bearer ${process.env.COHERE_API_KEY}`,
         "Content-Type": "application/json",
       },
-    }
+    },
   );
 
   const raw = response.data.generations?.[0]?.text || "";
 
-  
   const slideChunks = raw.split(/Slide \d+:/i).filter(Boolean);
 
   const slides = slideChunks.map((chunk: string) => {
