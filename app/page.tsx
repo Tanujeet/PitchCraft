@@ -8,8 +8,26 @@ import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion";
 import { ArrowRight, Sparkles, Loader2, PlayCircle } from "lucide-react";
+
+// Strongly typed variants for Framer Motion (Fixes the Vercel build error)
+const containerVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1, delayChildren: 0.2 },
+  },
+};
+
+const itemVariants: Variants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.6, ease: "easeOut" },
+  },
+};
 
 export default function HomePage() {
   const { user, isLoaded } = useUser();
@@ -28,24 +46,6 @@ export default function HomePage() {
       </div>
     );
   }
-
-  // Animation variants for staggered hero entrance
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { staggerChildren: 0.1, delayChildren: 0.2 },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.6, ease: "easeOut" },
-    },
-  };
 
   return (
     <main className="relative min-h-screen bg-neutral-950 text-neutral-50 font-sans selection:bg-purple-500/30">
@@ -279,7 +279,7 @@ export default function HomePage() {
         </motion.div>
       </div>
 
-      {/* Imported Sections - Assuming these handle their own internal max-widths */}
+      {/* Imported Sections */}
       <div className="relative z-10 divide-y divide-neutral-900">
         <section id="how-it-works" className="py-24 bg-neutral-950">
           <HowItWorksSection />

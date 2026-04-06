@@ -3,7 +3,7 @@
 import { useUser } from "@clerk/nextjs";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion";
 import { Target, Layers, BarChart3, Plus } from "lucide-react";
 import { axiosInstance } from "@/lib/axios";
 import RecentPitches from "@/components/RecentPitches";
@@ -39,7 +39,8 @@ const STAT_CONFIG = [
   },
 ];
 
-const containerVariants = {
+// Added strict Framer Motion typing here
+const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
@@ -47,7 +48,8 @@ const containerVariants = {
   },
 };
 
-const itemVariants = {
+// Added strict Framer Motion typing here
+const itemVariants: Variants = {
   hidden: { opacity: 0, y: 20 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
 };
