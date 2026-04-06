@@ -2,23 +2,39 @@
 
 import { useUser } from "@clerk/nextjs";
 import { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
+import { useRouter } from "next/navigation";
+import { axiosInstance } from "@/lib/axios";
 import RecentPitches from "@/components/RecentPitches";
 import QuickAction from "@/components/QuickAction";
-import { axiosInstance } from "@/lib/axios";
+import styles from "./page.module.css";
+
+interface Summary {
+  totalPitch: number;
+  totalSlides: number;
+  averageSlidesPerPitch: number;
+}
+
+const STAT_ICONS = ["🎯", "📄", "📊"] as const;
+const STAT_ICON_CLASSES = [
+  styles.iconPurple,
+  styles.iconTeal,
+  styles.iconAmber,
+] as const;
+const STAT_ACCENT_CLASSES = [
+  styles.accentPurple,
+  styles.accentTeal,
+  styles.accentAmber,
+] as const;
 
 const Page = () => {
   const { user } = useUser();
-  const username = user?.firstName || "Developer";
-  const [summary, setSummary] = useState<{
-    totalPitch: number;
-    totalSlides: number;
-    averageSlidesPerPitch: number;
-  } | null>(null);
+  const router = useRouter();
+  const username = user?.firstName || "there";
+
+  const [summary, setSummary] = useState<Summary | null>(null);
 
   useEffect(() => {
-    const FetchSummary = async () => {
+    const fetchSummary = async () => {
       try {
         const res = await axiosInstance.get("/summary");
         setSummary(res.data);
@@ -26,63 +42,113 @@ const Page = () => {
         console.error("Failed to fetch summary", e);
       }
     };
-    FetchSummary();
+    fetchSummary();
   }, []);
 
-  const data = summary
+  const today = new Date().toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    year: "numeric",
+  });
+
+  const stats = summary
     ? [
-        { title: "Total Pitches", des: summary.totalPitch },
-        { title: "Total Slides", des: summary.totalSlides },
         {
-          title: "Avg Slides per Pitch",
-          des: summary.averageSlidesPerPitch.toFixed(1),
+          label: "Total pitches",
+          value: summary.totalPitch,
+          sub: "All time",
+        },
+        {
+          label: "Total slides",
+          value: summary.totalSlides,
+          sub: "Across all pitches",
+        },
+        {
+          label: "Avg slides / pitch",
+          value: summary.averageSlidesPerPitch.toFixed(1),
+          sub: "Industry avg: 8.2",
         },
       ]
-    : [];
+    : null;
 
   return (
-    <main className="px-6 py-16 ">
-      <section>
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
-          <h1 className="text-3xl sm:text-4xl font-bold text-center sm:text-left">
-            Welcome back, {username}
+    <main className={styles.root}>
+      {/* Background orbs */}
+      <div className={`${styles.orb} ${styles.orb1}`} />
+      <div className={`${styles.orb} ${styles.orb2}`} />
+
+      {/* Header */}
+      <div className={styles.header}>
+        <div>
+          <p className={styles.greetingSub}>{today}</p>
+          <h1 className={styles.greeting}>
+            Welcome back, <em className={styles.greetingItalic}>{username}</em>
           </h1>
         </div>
+        <button
+          className={styles.newBtn}
+          onClick={() => router.push("/create")}
+        >
+          <svg
+            className={styles.plusIcon}
+            viewBox="0 0 16 16"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            strokeLinecap="round"
+          >
+            <line x1="8" y1="2" x2="8" y2="14" />
+            <line x1="2" y1="8" x2="14" y2="8" />
+          </svg>
+          New pitch
+        </button>
+      </div>
 
-        {/* ✅ Summary Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mt-6">
-          {summary === null
-            ? [1, 2, 3].map((_, idx) => (
-                <Card key={idx} className="shadow-md rounded-2xl p-4 space-y-4">
-                  <Skeleton className="h-6 w-1/3" />
-                  <Skeleton className="h-10 w-1/4" />
-                </Card>
-              ))
-            : data.map((item, idx) => (
-                <Card key={idx} className="shadow-md rounded-2xl">
-                  <CardHeader>
-                    <CardTitle className="text-lg font-semibold">
-                      {item.title}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-2xl font-bold">{item.des}</p>
-                  </CardContent>
-                </Card>
-              ))}
-        </div>
-      </section>
+      {/* Stat cards */}
+      <div className={styles.statGrid}>
+        {stats === null
+          ? [0, 1, 2].map((i) => (
+              <div key={i} className={styles.statCard}>
+                <div className={`${styles.statIcon} ${styles.iconPurple}`} />
+                <div
+                  className={styles.skeleton}
+                  style={{ width: "60%", height: 13, marginBottom: 12 }}
+                />
+                <div
+                  className={styles.skeleton}
+                  style={{ width: "40%", height: 32 }}
+                />
+              </div>
+            ))
+          : stats.map((stat, i) => (
+              <div key={i} className={styles.statCard}>
+                <div className={`${styles.statIcon} ${STAT_ICON_CLASSES[i]}`}>
+                  {STAT_ICONS[i]}
+                </div>
+                <p className={styles.statLabel}>{stat.label}</p>
+                <p className={styles.statValue}>{stat.value}</p>
+                <p className={styles.statSub}>{stat.sub}</p>
+                <div
+                  className={`${styles.statAccent} ${STAT_ACCENT_CLASSES[i]}`}
+                />
+              </div>
+            ))}
+      </div>
 
-      {/* ✅ Recent Activity */}
-      <section className="mt-12">
-        <h1 className="text-3xl font-bold">Recent Activity</h1>
-        <RecentPitches />
-      </section>
+      {/* Bottom two-column layout */}
+      <div className={styles.twoCol}>
+        {/* Recent Activity */}
+        <section className={styles.section}>
+          <p className={styles.sectionLabel}>Recent activity</p>
+          <RecentPitches />
+        </section>
 
-      {/* ✅ Quick Actions */}
-      <section className="mt-12">
-        <QuickAction />
-      </section>
+        {/* Quick Actions */}
+        <section className={styles.section}>
+          <p className={styles.sectionLabel}>Quick actions</p>
+          <QuickAction />
+        </section>
+      </div>
     </main>
   );
 };

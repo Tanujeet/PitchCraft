@@ -3,33 +3,34 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Slides from "@/components/Slides";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
-import { axiosInstance } from "@/lib/axios";
 import { Spinner } from "@/components/Spinner";
+import { axiosInstance } from "@/lib/axios";
+import styles from "./page.module.css";
+
+const EXAMPLES = [
+  "A subscription app for indie bookstores",
+  "AI tutor for rural students",
+  "Zero-waste grocery delivery",
+];
+
+const MAX_CHARS = 500;
 
 const Page = () => {
   const [idea, setIdea] = useState("");
   const [slides, setSlides] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [projectId, setProjectId] = useState("");
 
   const router = useRouter();
-  const [projectId, setProjectId] = useState("");
+
   const generateSlides = async () => {
+    if (!idea.trim()) return;
     try {
       setLoading(true);
-      setDialogOpen(true); // 👈 open dialog manually
+      setModalOpen(true);
       const res = await axiosInstance.post("/slides/generate", { idea });
       const { projectId, slides } = res.data;
-
       setSlides(slides);
       setProjectId(projectId);
       setIdea("");
@@ -40,76 +41,133 @@ const Page = () => {
     }
   };
 
+  const handleIdea = (val: string) => {
+    if (val.length <= MAX_CHARS) setIdea(val);
+  };
+
   return (
-    <main>
-      <section>
-        <div className="flex justify-center items-center mt-20">
-          <div className="text-center max-w-2xl">
-            <h1 className="text-4xl sm:text-5xl font-bold leading-tight">
-              Describe your idea. Let AI craft your pitch.
-            </h1>
-            <p className="text-lg sm:text-xl mt-4 font-medium text-gray-600">
-              Powered by AI, built for visionaries.
-            </p>
+    <main className={styles.root}>
+      {/* Background orbs */}
+      <div className={`${styles.orb} ${styles.orb1}`} />
+      <div className={`${styles.orb} ${styles.orb2}`} />
 
-            <Textarea
-              value={idea}
-              onChange={(e) => setIdea(e.target.value)}
-              placeholder="An app that connects local artists with businesses for mural projects..."
-              className="mt-10 h-40 text-base resize-none"
-            />
+      {/* Main card */}
+      <div className={styles.card}>
+        <div className={styles.badge}>
+          <span className={styles.badgeDot} />
+          AI-powered pitch builder
+        </div>
 
-            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-              <DialogTrigger asChild>
-                <Button
-                  className="mt-10"
-                  onClick={generateSlides}
-                  disabled={loading || !idea.trim()}
-                >
-                  {loading ? (
-                    <div className="flex items-center gap-2">
-                      <Spinner />
-                      Generating...
-                    </div>
-                  ) : (
-                    "Generate Slides"
-                  )}
-                </Button>
-              </DialogTrigger>
+        <h1 className={styles.heading}>
+          Describe your idea.
+          <br />
+          <em className={styles.headingItalic}>Let AI craft your pitch.</em>
+        </h1>
 
-              <DialogContent className="max-w-3xl">
-                <DialogHeader>
-                  <DialogTitle className="text-center">
-                    Your AI-Generated Slides
-                  </DialogTitle>
-                </DialogHeader>
+        <p className={styles.subtitle}>
+          Turn a rough idea into a compelling slide deck in seconds.
+        </p>
 
-                {loading ? (
-                  <div className="flex justify-center items-center min-h-[200px]">
-                    <Spinner />
-                  </div>
-                ) : (
-                  <>
-                    <Slides slides={slides} />
+        {/* Textarea */}
+        <div className={styles.textareaWrap}>
+          <textarea
+            className={styles.textarea}
+            value={idea}
+            onChange={(e) => handleIdea(e.target.value)}
+            placeholder="An app that connects local artists with businesses for mural projects..."
+          />
+          <span className={styles.charCount}>
+            {idea.length} / {MAX_CHARS}
+          </span>
+        </div>
 
-                    <Button
-                      onClick={() => router.push("/dashboard")}
-                      className="mt-6 w-full"
-                    >
-                      Continue to Editor
-                    </Button>
-                  </>
-                )}
-              </DialogContent>
-            </Dialog>
+        {/* Actions */}
+        <div className={styles.actions}>
+          <button
+            className={styles.btnPrimary}
+            onClick={generateSlides}
+            disabled={loading || !idea.trim()}
+          >
+            {loading ? (
+              <>
+                <Spinner />
+                Generating…
+              </>
+            ) : (
+              "Generate slides"
+            )}
+          </button>
+          <button className={styles.btnSecondary} onClick={() => setIdea("")}>
+            Clear
+          </button>
+        </div>
 
-            <p className="font-light mt-4 text-gray-500">
-              💡 Tip: Write your idea like you're talking to an investor or
-              user.
-            </p>
+        {/* Tip */}
+        <div className={styles.tip}>
+          <span className={styles.tipIcon}>💡</span>
+          <p>
+            <strong>Tip:</strong> Write your idea like you're pitching to an
+            investor — include the problem, your solution, and who it's for.
+          </p>
+        </div>
+
+        {/* Example chips */}
+        <div className={styles.examples}>
+          <p className={styles.examplesLabel}>Try an example</p>
+          <div className={styles.chips}>
+            {EXAMPLES.map((ex) => (
+              <button
+                key={ex}
+                className={styles.chip}
+                onClick={() => setIdea(ex)}
+              >
+                {ex}
+              </button>
+            ))}
           </div>
         </div>
-      </section>
+      </div>
+
+      {/* Modal */}
+      {modalOpen && (
+        <div
+          className={styles.modalBackdrop}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setModalOpen(false);
+          }}
+        >
+          <div className={styles.modal}>
+            <div className={styles.modalHeader}>
+              <span className={styles.modalTitle}>Your slides</span>
+              <button
+                className={styles.modalClose}
+                onClick={() => setModalOpen(false)}
+              >
+                ✕
+              </button>
+            </div>
+
+            {loading ? (
+              <div className={styles.loadingState}>
+                <div className={styles.loadingRing} />
+                <p className={styles.loadingText}>Crafting your pitch deck…</p>
+              </div>
+            ) : (
+              <>
+                <div className={styles.slidesWrap}>
+                  <Slides slides={slides} />
+                </div>
+                <button
+                  className={styles.btnFull}
+                  onClick={() => router.push(`/dashboard/${projectId}`)}
+                >
+                  Continue to editor →
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </main>
   );
 };
